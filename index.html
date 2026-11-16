@@ -1,23 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TNPSC Study Tracker — Cloud CRUD Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    };
+  </script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #f8fafc;
-    }
-
-    .glass-card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
     }
 
     ::-webkit-scrollbar {
@@ -26,36 +25,51 @@
     }
 
     ::-webkit-scrollbar-track {
-      background: #f1f5f9;
+      background: transparent;
     }
 
     ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
+      background: #94a3b8;
       border-radius: 3px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
+      background: #64748b;
     }
   </style>
 </head>
 
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased min-h-screen flex flex-col transition-colors duration-200">
 
   <!-- Top Navigation Bar -->
-  <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="bg-indigo-600 p-2 rounded-lg">
+  <header class="bg-slate-900 dark:bg-slate-900/95 border-b border-slate-800 text-white sticky top-0 z-30 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="bg-indigo-600 p-2 rounded-lg shrink-0">
           <i data-lucide="book-open-check" class="w-5 h-5 text-white"></i>
         </div>
-        <div>
-          <h1 class="font-bold text-base sm:text-lg tracking-tight leading-tight">TNPSC Study Tracker</h1>
-          <p class="text-[11px] text-slate-400 hidden sm:block">Classes, Resources & Mock Tests Cloud Manager</p>
+        <div class="truncate">
+          <h1 class="font-bold text-base sm:text-lg tracking-tight leading-tight truncate">TNPSC Study Tracker</h1>
+          <p class="text-[11px] text-slate-400 hidden sm:block">Classes, Subjects, Resources & Mock Tests Cloud Manager</p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2 sm:gap-3">
+      <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+        <!-- Light / Dark Theme Toggle -->
+        <button onclick="toggleTheme()" id="themeToggleBtn" title="Switch Light / Dark Theme"
+          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">
+          <i id="themeIconSun" data-lucide="sun" class="w-4 h-4 text-amber-400 hidden"></i>
+          <i id="themeIconMoon" data-lucide="moon" class="w-4 h-4 text-indigo-300"></i>
+          <span id="themeLabel" class="hidden md:inline">Dark</span>
+        </button>
+
+        <!-- Manage Subjects List Button -->
+        <button onclick="openSubjectsModal()" title="Add or Edit Subjects List"
+          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-indigo-600/25 hover:bg-indigo-600/40 border border-indigo-500/40 text-indigo-200 transition">
+          <i data-lucide="folder-cog" class="w-4 h-4 text-indigo-300"></i>
+          <span class="hidden sm:inline">Subjects</span>
+        </button>
+
         <!-- Cloud Sync Status Pill -->
         <button onclick="openCloudModal()" id="cloudStatusBtn"
           class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-800 hover:bg-slate-700 border border-slate-700 transition">
@@ -83,84 +97,95 @@
 
     <!-- KPI Summary Cards -->
     <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+      <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
         <div>
-          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Classes</p>
-          <p id="statTotal" class="text-2xl font-bold text-slate-900 mt-1">0</p>
+          <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Classes</p>
+          <p id="statTotal" class="text-2xl font-bold text-slate-900 dark:text-white mt-1">0</p>
         </div>
-        <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+        <div class="p-3 bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 rounded-xl">
           <i data-lucide="layers" class="w-5 h-5"></i>
         </div>
       </div>
 
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+      <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
         <div>
-          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Completed</p>
+          <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Completed</p>
           <div class="flex items-baseline gap-2 mt-1">
-            <p id="statCompleted" class="text-2xl font-bold text-emerald-600">0</p>
+            <p id="statCompleted" class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">0</p>
             <span id="statPercent"
-              class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">0%</span>
+              class="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 px-1.5 py-0.5 rounded">0%</span>
           </div>
         </div>
-        <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+        <div class="p-3 bg-emerald-50 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 rounded-xl">
           <i data-lucide="check-circle-2" class="w-5 h-5"></i>
         </div>
       </div>
 
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+      <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
         <div>
-          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Pending Classes</p>
-          <p id="statPending" class="text-2xl font-bold text-amber-600 mt-1">0</p>
+          <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pending Classes</p>
+          <p id="statPending" class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">0</p>
         </div>
-        <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+        <div class="p-3 bg-amber-50 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 rounded-xl">
           <i data-lucide="clock" class="w-5 h-5"></i>
         </div>
       </div>
 
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+      <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
         <div>
-          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Mock Exams</p>
-          <p id="statExams" class="text-2xl font-bold text-violet-600 mt-1">0</p>
+          <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Mock Exams</p>
+          <p id="statExams" class="text-2xl font-bold text-violet-600 dark:text-violet-400 mt-1">0</p>
         </div>
-        <div class="p-3 bg-violet-50 text-violet-600 rounded-xl">
+        <div class="p-3 bg-violet-50 dark:bg-violet-950/70 text-violet-600 dark:text-violet-400 rounded-xl">
           <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
         </div>
       </div>
     </section>
 
     <!-- Subject Progress Strip -->
-    <section class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
-          <i data-lucide="bar-chart-3" class="w-4 h-4 text-indigo-600"></i>
+    <section class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+          <i data-lucide="bar-chart-3" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
           Subject-wise Syllabus Progress
         </h2>
-        <button onclick="toggleProgressDrawer()" id="toggleProgressBtn"
-          class="text-xs font-medium text-indigo-600 hover:text-indigo-800">
-          Show All Subjects
-        </button>
+        <div class="flex items-center gap-3">
+          <button onclick="openSubjectsModal()"
+            class="text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1">
+            <i data-lucide="pencil-line" class="w-3.5 h-3.5"></i> Add / Edit Subjects
+          </button>
+          <button onclick="toggleProgressDrawer()" id="toggleProgressBtn"
+            class="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300">
+            Show All Subjects
+          </button>
+        </div>
       </div>
       <div id="subjectProgressGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
     </section>
 
-    <!-- Tab Navigation & Primary Action Button -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-3">
-      <div class="flex bg-slate-200/70 p-1 rounded-xl w-fit">
+    <!-- Tab Navigation & Primary Action Buttons -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+      <div class="flex bg-slate-200/70 dark:bg-slate-800/80 p-1 rounded-xl w-fit">
         <button onclick="switchTab('classes')" id="tabClasses"
-          class="px-4 py-2 rounded-lg text-sm font-semibold bg-white text-slate-900 shadow-sm transition flex items-center gap-2">
-          <i data-lucide="video" class="w-4 h-4 text-indigo-600"></i>
+          class="px-4 py-2 rounded-lg text-sm font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm transition flex items-center gap-2">
+          <i data-lucide="video" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
           Classes & Sources
-          <span id="badgeClasses" class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">0</span>
+          <span id="badgeClasses" class="text-xs bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full">0</span>
         </button>
         <button onclick="switchTab('exams')" id="tabExams"
-          class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2">
-          <i data-lucide="clipboard-check" class="w-4 h-4 text-violet-600"></i>
+          class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2">
+          <i data-lucide="clipboard-check" class="w-4 h-4 text-violet-600 dark:text-violet-400"></i>
           Mock Exams
-          <span id="badgeExams" class="text-xs bg-slate-300 text-slate-700 px-2 py-0.5 rounded-full">0</span>
+          <span id="badgeExams" class="text-xs bg-slate-300 dark:bg-slate-700 text-slate-700 dark:text-slate-200 px-2 py-0.5 rounded-full">0</span>
         </button>
       </div>
 
       <div class="flex items-center gap-2">
+        <button onclick="openSubjectsModal()"
+          class="w-full sm:w-auto bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-medium text-sm px-3.5 py-2.5 rounded-xl shadow-xs transition flex items-center justify-center gap-2">
+          <i data-lucide="list-plus" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
+          <span>Edit Subjects</span>
+        </button>
         <button onclick="openRecordModal()"
           class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm px-4 py-2.5 rounded-xl shadow-sm transition flex items-center justify-center gap-2">
           <i data-lucide="plus" class="w-4 h-4"></i>
@@ -173,36 +198,36 @@
     <section id="viewClasses" class="space-y-4">
       <!-- Filters Bar -->
       <div
-        class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         <div class="lg:col-span-2 relative">
           <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
           <input type="text" id="searchInput" oninput="renderClasses()"
             placeholder="Search topic, faculty, or source..."
-            class="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            class="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
         </div>
         <select id="filterSubject" onchange="renderClasses()"
-          class="text-sm border border-slate-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          class="text-sm border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
           <option value="">All Subjects</option>
         </select>
         <select id="filterFaculty" onchange="renderClasses()"
-          class="text-sm border border-slate-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          class="text-sm border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
           <option value="">All Faculties</option>
         </select>
         <select id="filterStatus" onchange="renderClasses()"
-          class="text-sm border border-slate-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          class="text-sm border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
           <option value="">All Statuses</option>
           <option value="Completed">Completed</option>
           <option value="Pending">Pending</option>
         </select>
       </div>
 
-      <!-- Responsive Classes Table / Mobile Cards -->
-      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <!-- Responsive Classes Table -->
+      <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr
-                class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                class="bg-slate-50 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                 <th class="py-3.5 px-4">Date</th>
                 <th class="py-3.5 px-4">Subject</th>
                 <th class="py-3.5 px-4">Topic</th>
@@ -212,13 +237,13 @@
                 <th class="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody id="classesTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+            <tbody id="classesTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm"></tbody>
           </table>
         </div>
-        <div id="classesEmpty" class="hidden p-10 text-center text-slate-500">
-          <i data-lucide="folder-open" class="w-10 h-10 mx-auto text-slate-300 mb-2"></i>
+        <div id="classesEmpty" class="hidden p-10 text-center text-slate-500 dark:text-slate-400">
+          <i data-lucide="folder-open" class="w-10 h-10 mx-auto text-slate-300 dark:text-slate-600 mb-2"></i>
           <p class="font-medium">No classes match your filters</p>
-          <button onclick="resetFilters()" class="mt-2 text-xs text-indigo-600 hover:underline">Clear all
+          <button onclick="resetFilters()" class="mt-2 text-xs text-indigo-600 dark:text-indigo-400 hover:underline">Clear all
             filters</button>
         </div>
       </div>
@@ -226,12 +251,12 @@
 
     <!-- EXAMS VIEW -->
     <section id="viewExams" class="hidden space-y-4">
-      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr
-                class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                class="bg-slate-50 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                 <th class="py-3.5 px-4">Date</th>
                 <th class="py-3.5 px-4">Question Paper</th>
                 <th class="py-3.5 px-4">OMR & Answer Key</th>
@@ -241,21 +266,29 @@
                 <th class="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody id="examsTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+            <tbody id="examsTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm"></tbody>
           </table>
         </div>
       </div>
     </section>
   </main>
 
+  <!-- Footer with Copyright -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+      <p>&copy; <span id="copyrightYear">2026</span> <strong class="text-slate-700 dark:text-slate-200 font-semibold">Nikeshkumar Udhayakumar</strong>. All rights reserved.</p>
+      <p>TNPSC Study Tracker &bull; Personal Cloud Study Portal</p>
+    </div>
+  </footer>
+
   <!-- CRUD Modal (Add / Edit Class or Exam) -->
   <div id="recordModal"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 hidden flex items-center justify-center p-4">
+    class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-40 hidden flex items-center justify-center p-4">
     <div
-      class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">
-      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-        <h3 id="modalTitle" class="font-bold text-slate-900 text-base">Add New Class</h3>
-        <button onclick="closeRecordModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+      class="bg-white dark:bg-slate-900 rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-fade-in">
+      <div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <h3 id="modalTitle" class="font-bold text-slate-900 dark:text-white text-base">Add New Class</h3>
+        <button onclick="closeRecordModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -265,63 +298,66 @@
         <input type="hidden" id="classEditId" />
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Date *</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Date *</label>
             <input type="date" id="cDate" required
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Subject *</label>
-            <input type="text" id="cSubject" list="subjectSuggestions" required placeholder="e.g., Polity, INM, Tamil"
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
-            <datalist id="subjectSuggestions"></datalist>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">Subject *</label>
+              <button type="button" onclick="quickAddSubjectFromForm()"
+                class="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">+ Add New</button>
+            </div>
+            <select id="cSubject" required
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"></select>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Topic</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Topic</label>
             <input type="text" id="cTopic" placeholder="e.g., Fundamental Rights"
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Faculty</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Faculty</label>
             <input type="text" id="cFaculty" list="facultySuggestions" placeholder="e.g., Ms.Gayathri"
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
             <datalist id="facultySuggestions"></datalist>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Class Video / Drive URL</label>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Class Video / Drive URL</label>
           <input type="url" id="cClassUrl" placeholder="https://drive.google.com/..."
-            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+            class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Source Material Name</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Source Material Name</label>
             <input type="text" id="cSourceName" placeholder="e.g., Notes.pdf or PPT"
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Source Material URL</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Source Material URL</label>
             <input type="url" id="cSourceUrl" placeholder="https://1drv.ms/..."
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Completion Status</label>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Completion Status</label>
           <select id="cStatus"
-            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+            class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
             <option value="Pending">Pending</option>
             <option value="Completed">Completed</option>
           </select>
         </div>
 
-        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
           <button type="button" onclick="closeRecordModal()"
-            class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+            class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">Cancel</button>
           <button type="submit"
             class="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm">Save
             Class</button>
@@ -333,14 +369,14 @@
         <input type="hidden" id="examEditId" />
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Exam Date *</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Exam Date *</label>
             <input type="date" id="eDate" required
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Status</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status</label>
             <select id="eStatus"
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
               <option value="Pending">Pending</option>
               <option value="Completed">Completed</option>
             </select>
@@ -349,57 +385,57 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Question Paper Name</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Question Paper Name</label>
             <input type="text" id="eQpName" placeholder="TNPSC - 2026 - TEST - 04.pdf"
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Question Paper URL / Path</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Question Paper URL / Path</label>
             <input type="text" id="eQpUrl" placeholder="https://... or file path"
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none" />
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Answer Key Name</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Answer Key Name</label>
             <input type="text" id="eAkName" placeholder="ANSWER KEY.pdf"
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Answer Key URL / Path</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Answer Key URL / Path</label>
             <input type="text" id="eAkUrl" placeholder="https://..."
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none" />
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">OMR Sheet URL</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">OMR Sheet URL</label>
             <input type="text" id="eOmrUrl" placeholder="OMR link"
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Marks Scored</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Marks Scored</label>
             <input type="text" id="eMarks" placeholder="e.g., 165 / 200"
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Percentage (%)</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Percentage (%)</label>
             <input type="text" id="ePercent" placeholder="e.g., 82.5%"
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none" />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Revision Notes</label>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Revision Notes</label>
           <textarea id="eNotes" rows="2" placeholder="Weak areas or key takeaways..."
-            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none"></textarea>
+            class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none"></textarea>
         </div>
 
-        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
           <button type="button" onclick="closeRecordModal()"
-            class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+            class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">Cancel</button>
           <button type="submit"
             class="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm">Save
             Exam</button>
@@ -408,10 +444,49 @@
     </div>
   </div>
 
+  <!-- Manage Subjects Modal (Add, Rename/Edit, Delete Subjects) -->
+  <div id="subjectsModal"
+    class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div
+      class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="folder-cog" class="w-5 h-5 text-indigo-400"></i>
+          <div>
+            <h3 class="font-bold text-base leading-tight">Manage Subjects List</h3>
+            <p class="text-[11px] text-slate-400">Add new subjects, rename existing ones, or remove unused items</p>
+          </div>
+        </div>
+        <button onclick="closeSubjectsModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Add New Subject Form -->
+      <form onsubmit="addNewSubjectItem(event)" class="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex gap-2">
+        <input type="text" id="newSubjectInput" required placeholder="New subject name (e.g., Unit 8, Unit 9)..."
+          class="flex-1 px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+        <button type="submit"
+          class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-xs flex items-center gap-1.5 shrink-0">
+          <i data-lucide="plus" class="w-4 h-4"></i> Add
+        </button>
+      </form>
+
+      <!-- Subject List Items -->
+      <div id="subjectsManagerList" class="p-4 space-y-2 overflow-y-auto flex-1"></div>
+
+      <div class="px-6 py-3 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+        <span>Renaming updates all classes under that subject.</span>
+        <button onclick="closeSubjectsModal()"
+          class="px-4 py-1.5 font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">Done</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Cloud Configuration Modal (Supabase Free Cloud DB) -->
   <div id="cloudModal"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden">
+    class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
       <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
         <div class="flex items-center gap-2">
           <i data-lucide="database" class="w-5 h-5 text-emerald-400"></i>
@@ -422,44 +497,44 @@
         </button>
       </div>
 
-      <div class="p-6 space-y-4 text-sm text-slate-600">
-        <p>Connect a free <strong>Supabase</strong> project (500 MB Postgres free forever) so your CRUD edits sync
-          across your phone, tablet, and laptop.</p>
+      <div class="p-6 space-y-4 text-sm text-slate-600 dark:text-slate-300">
+        <p>Connected to your <strong>Supabase</strong> cloud database so your classes, subjects list, and mock exams sync across devices.</p>
 
-        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-1.5">
-          <p class="font-semibold text-slate-800">1-Minute Setup SQL (Run in Supabase SQL Editor):</p>
-          <pre class="bg-slate-900 text-emerald-300 p-2.5 rounded overflow-x-auto select-all">create table if not exists tracker_store (
+        <div class="bg-slate-50 dark:bg-slate-800/70 p-3 rounded-lg border border-slate-200 dark:border-slate-700 text-xs space-y-1.5">
+          <p class="font-semibold text-slate-800 dark:text-slate-200">1-Minute Setup SQL (Run in Supabase SQL Editor):</p>
+          <pre class="bg-slate-950 text-emerald-300 p-2.5 rounded overflow-x-auto select-all">create table if not exists public.tracker_store (
   id text primary key,
   payload jsonb not null,
   updated_at timestamptz default now()
 );
-alter table tracker_store disable row level security;</pre>
+alter table public.tracker_store disable row level security;
+grant all on table public.tracker_store to anon, authenticated;</pre>
         </div>
 
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Supabase Project URL</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Supabase Project URL</label>
             <input type="url" id="sbUrl" placeholder="https://xyzcompany.supabase.co"
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Supabase Anon Public Key</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Supabase Anon Public Key</label>
             <input type="password" id="sbKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..."
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Workspace ID (Your Sync Key)</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Workspace ID (Your Sync Key)</label>
             <input type="text" id="sbWorkspace" value="tnpsc_main_tracker"
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" />
+              class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
         </div>
 
-        <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
           <button type="button" onclick="resetToExcelSeed()"
-            class="text-xs text-rose-600 hover:underline font-medium">Reset to Original Excel Data</button>
+            class="text-xs text-rose-600 dark:text-rose-400 hover:underline font-medium">Reset to Original Excel Data</button>
           <div class="flex gap-2">
             <button type="button" onclick="disconnectCloud()"
-              class="px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Use Local Only</button>
+              class="px-3 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">Use Local Only</button>
             <button type="button" onclick="connectAndSyncCloud()"
               class="px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm">Connect
               & Sync</button>
@@ -471,24 +546,83 @@ alter table tracker_store disable row level security;</pre>
 
   <!-- Toast Notification -->
   <div id="toast"
-    class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs font-medium px-4 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
+    class="fixed bottom-5 right-5 bg-slate-900 dark:bg-slate-800 text-white border border-slate-700 text-xs font-medium px-4 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
     <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
     <span id="toastMsg">Saved!</span>
   </div>
 
   <script>
     // Pre-loaded data extracted directly from your TNPSC_Study_Tracker.xls
-    const SEED_PAYLOAD = { "c": [["2026-01-27", "Polity", "Historical Background of indian Constitution", "Ms.Gayathri", "https://drive.google.com/file/d/1XjaPCSCBKeMldBe4tKo0-kB6E-nYznP8/view", "Historical Background of the Constitution (1).pptx", "https://1drv.ms/p/c/766fa90f85741ef0/IQDTipMXvT8qQr8ln2Qaz0VhAU4w3I5EegNcgxkE5ivl1e8?e=klqdTp", 1], ["2026-01-28", "Polity", "Historical Background of indian Constitution", "Ms.Gayathri", "https://drive.google.com/file/d/1uNqMgIYa1gznMWYIEFZk6QqfUjRjQbPU/view", "", "", 1], ["2026-01-31", "INM", "Advent of europeans", "Mr.Vignesh", "https://drive.google.com/file/d/1TzIh74aHmJFmMdQCo2vh_PmJ1AL9vFDp/view", "", "", 0], ["2026-02-02", "Tamil", "", "Ms.Vijaya", "https://drive.google.com/file/d/1Uh4Q542qWvtOgwsibyRBrqGOOtcHx06H/view", "", "", 0], ["2026-02-03", "Polity", "CA Adopted", "Ms.Gayathri", "https://drive.google.com/file/d/10LyJ2QOpVn4Q1s_K0A1R-lvCXE2XDn5x/view", "", "", 1], ["2026-02-05", "Polity", "Source of Constitution", "Ms.Gayathri", "https://drive.google.com/file/d/1MdZu2_fWhfWx8s0_WVfkl6x5Cqk7iYZx/view", "", "", 1], ["2026-02-07", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/1M-iAhLIyLYWqCHDUmuOR9Cha2SLD9BIu/view", "", "", 0], ["2026-02-09", "Polity", "Part 1", "Ms.Gayathri", "https://drive.google.com/file/d/1rp4aU06aKJPQtxtb8jNAyuAba_UzCCmI/view", "", "", 0], ["2026-02-10", "Tamil", "", "Ms.Vijaya", "https://drive.google.com/file/d/1JEZueNz72fj4ll37bDTvTJGgk_RU45C0/view", "", "", 0], ["2026-02-12", "Geography", "Introduction", "Mr.Bravin kumar", "https://drive.google.com/file/d/1SspDicQqayED2JGqURrioSmcvsBse1P7/view", "", "", 0], ["2026-02-13", "Current Affairs", "", "Ms.Divya", "https://drive.google.com/file/d/14mz1DSCpu8Z1306DOg75jtzsMxzlffKS/view", "", "", 0], ["2026-02-14", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/1nHXcO4hkV1JUghOaLuV6iZdJjAgAKqPi/view", "", "", 0], ["2026-02-15", "Science", "", "Mr.Naganathan", "https://drive.google.com/file/d/1vxpqDVSFb4Ckpg5e2nGCGz189gDIkt2-/view", "", "", 0], ["2026-02-16", "Tamil", "", "Ms.Vijaya", "https://drive.google.com/file/d/1y5XVqiHaXz-Ybzu1xC9IFgdMpLJZPFOq/view", "", "", 0], ["2026-02-18", "Aptitude", "Direction", "Ms.Divya", "https://drive.google.com/file/d/1DBRD3V4l06b-jumLGj8zacz50TB5MyMl/view", "", "", 0], ["2026-02-20", "Geography", "", "Mr.Bravin kumar", "https://drive.google.com/file/d/1bNJmVBrARjkPElWiO9aqTmNHCzZiSiPS/view", "", "", 0], ["2026-02-23", "DA in TN", "Introduction", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1S6EoSsGz9XUDd_s3c1fVzBZdJ6aGqapJ/view", "Where to study.docx", "https://1drv.ms/w/c/766fa90f85741ef0/IQATNr9zXgyWQoAcLptCXQqjASWQbhYYOShYxV8SrQ1NhV8?e=spDIzy", 0], ["2026-02-24", "Tamil", "", "Ms.Vijaya", "https://drive.google.com/file/d/17aVlApdnBjTkAT5miCZgYwWbWkPxhQZi/view", "", "", 0], ["2026-02-25", "Polity", "Fundamental Rights", "Ms.Gayathri", "https://drive.google.com/file/d/1Otg9Tnz-QLHI-sfVbTFKE1f0LXOgol4Y/view", "", "", 0], ["2026-02-26", "Aptitude", "Number series", "Ms.Divya", "https://drive.google.com/file/d/1uMli8UtalnAwIjsxCZk7yR3KpVoVZEJh/view", "", "", 0], ["2026-02-28", "INM", "Islamic reform movements", "Mr.Vignesh", "https://drive.google.com/file/d/1Y03RrDw8jAYnebw22T9tt9ycUuiwyVBx/view", "", "", 0], ["2026-03-01", "Science", "", "Mr.Gokul", "https://drive.google.com/file/d/1oSbIhTumcpI_htJJmSPPpX5OEYeqEWbe/view", "", "", 0], ["2026-03-02", "Tamil", "", "Ms.Vijaya", "", "", "", 0], ["2026-03-03", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1-pzDFP6MCZcyptWifrMdrtQV53cU4bZw/view", "", "", 0], ["2026-03-04", "DA in TN", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1vmo8Zd_AZhRN6Sk4GYRV2Ex54fWT14n-/view", "", "", 0], ["2026-03-05", "Aptitude", "", "Ms.Divya", "https://drive.google.com/file/d/1ToZ1EdQp0Zi1WuAUVWaaCIJDp2TcKewj/view", "", "", 0], ["2026-03-07", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/15Bpt0A-kCHh0GGITlkx5M68Jr884fhYv/view", "", "", 0], ["2026-03-08", "Science", "", "Mr.Naganathan", "https://drive.google.com/file/d/1wF_c8OAmzgeiaRlu9D3vfWcEjtgQyO4M/view", "", "", 0], ["2026-03-09", "Tamil", "", "Ms.Vijaya", "https://drive.google.com/file/d/1gfm6FXogMseX9ZNzDLtMkGTTBMAWZrQq/view", "", "", 0], ["2026-03-10", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1m9_l3A9YzNErWWX8ePZlMX9qwlaFclpI/view", "", "", 0], ["2026-03-11", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/1QUHQLNYOg9-ktbPKGQUug5muPOmcdQOg/view", "", "", 0], ["2026-03-12", "Ethics", "", "Mr.Kamaraj", "https://drive.google.com/file/d/1IUArPWzYXy3lYBaHGSBQgvgvZvFigdVU/view", "", "", 0], ["2026-03-13", "Environment", "", "Mr.Ashok", "https://drive.google.com/file/d/1mtoGshC5nQb5wyOzpJW9fyVBXP9spal7/view", "", "", 0], ["2026-03-14", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1o9jba2h3SECGNb_ZAcyS6tafwRYNyFfs/view", "", "", 0], ["2026-03-15", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/1paK25op5G7oIQL_PyTf0BefrXisQQi-J/view", "", "", 0], ["2026-03-16", "Tamil", "", "Ms.Vijaya", "https://drive.google.com/file/d/18_XEsAttK2YL29YAIs9EVHax_xCpCvWo/view", "", "", 0], ["2026-03-17", "Polity", "Making of constitution ,preamble,Union and it's territories", "Ms.Gayathri", "https://drive.google.com/file/d/1wwiLhllK3GpWlN6B-JxuEzySE9KVHMFg/view", "", "", 0], ["2026-03-18", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/1uUzrR7o_Cb9w3tuSmghU5aVrvnqvCQnc/view", "", "", 0], ["2026-03-19", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1kbi49qajX1oludf6ikL15kuTOWKFayJb/view", "5_6172243384493678167.pdf | DOC-20260318-WA0027..pdf", "Telegram%20Desktop/5_6172243384493678167.pdf | Telegram%20Desktop/DOC-20260318-WA0027..pdf", 0], ["2026-03-20", "Environment", "", "Mr.Ashok", "", "", "", 0], ["2026-03-21", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/1X2zUXNcWLamBqdyrJxw5yT81yuX2pt_P/view", "", "", 0], ["2026-03-22", "History changed (science)", "", "Mr.Naganathan", "https://drive.google.com/file/d/1AIcNn70pr4JAJY6P0aFB69WN0rE8aLiL/view", "", "", 0], ["2026-03-23", "Tamil", "", "Ms.Vijaya", "", "", "", 0], ["2026-03-24", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1PcupFO0HMvqSc1ZCmEEvQ89QiwFnBMS8/view", "", "", 0], ["2026-03-25", "Current Affairs", "", "Ms.Divya", "https://drive.google.com/file/d/1_2GmJL0UBzT3WFGEv-WzYYzTYjfPbiLP/view", "", "", 0], ["2026-03-26", "History", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1avxMiLu5RmLhYnbmC06XLd_x5s988eOC/view", "", "", 0], ["2026-03-27", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/1ra6c7svEfW-ntKfKq8_MPcC6jtXkNOUj/view", "economy Presentation (1).pptx | ECO 3.pptx | Eco batch 2.pptx | CLASS 4.pptx", "https://1drv.ms/p/c/766fa90f85741ef0/IQCTAH23onkyTImxICPXJbujAbZLsty37VDUhFyaH1p_5wo?e=0p2Fee | https://1drv.ms/p/c/766fa90f85741ef0/IQAucZXiWKmRQLjNYgBzHnx8AdVGVNPdVxBAkQ1JWGqAbTA?e=SxR1et | https://1drv.ms/p/c/766fa90f85741ef0/IQCntupnfSRjT5QEQGQMYwRGAdOP244Vxxhp3ZuFF3aSViw?e=nPypf9 | https://1drv.ms/p/c/766fa90f85741ef0/IQAHHbu14JNGQp8KP5SybeLhAdVuo7LveezwBzeOzqiuVB0?e=8NzsOG", 0], ["2026-03-28", "INM", "", "Mr.Vignesh", "", "", "", 0], ["2026-03-28", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1UMcOZC2eYoZIrPd-3waI8bBuFtyHwb4Z/view", "", "", 0], ["2026-03-29", "Ethics", "", "Mr.Kamaraj", "https://drive.google.com/file/d/1avxMiLu5RmLhYnbmC06XLd_x5s988eOC/view", "", "", 0], ["2026-03-30", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/14Qmofr7hrqLJ_jrkpW4YV437WnhsfhX3/view", "", "", 0], ["2026-03-31", "Tamil", "", "Ms.Vijaya", "https://drive.google.com/file/d/1cBUzjGhFf_4XjVHTsMPrFmiyUtWMWeVh/view", "", "", 0], ["2026-04-01", "History", "Medieval His", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1SfBKQNNbJ4TwEYagGefX7SkJWoxL1On5/view", "The Delhi Sultanate.pdf | RAJPUTS.pptx | conquest of arabs.pptx | DELHI SULTANS.pptx", "Telegram%20Desktop/The%20Delhi%20Sultanate.pdf | https://1drv.ms/p/c/766fa90f85741ef0/IQAAPywDKyTITKek9iDd-8rzAQAzZol_IBEingC-YriWqco?e=fxNj6t | https://1drv.ms/p/c/766fa90f85741ef0/IQALxL9kGY6WTrUh-TXMLN0PAXlhqMGHdGEq_0P1ophRfqg?e=blCZpx | https://1drv.ms/p/c/766fa90f85741ef0/IQA7EdZDFdTOTKbqoFD3WoxeAW2bJPoMTSZDXWpSBEBTW1s?e=c5IJHb", 0], ["2026-04-02", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1TZGKO51MFqY1b6oWbXhkw3YNlfJke_1T/view", "", "", 0], ["2026-04-03", "Environment", "", "Mr.Ashok", "", "", "", 0], ["2026-04-04", "History", "Medieval His", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1w1BwAkzmVFdPTOHgeRxi6cNW8QWapNhU/view", "", "", 0], ["2026-04-04", "Aptitude", "LCM&HCF", "Ms.Divya", "https://drive.google.com/file/d/1oiLiOoX-1b2zuZsnHGHnZXnPRfeSGyz8/view", "", "", 0], ["2026-04-05", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/1rDJVfTXY9KspWb9TdycZPpmbrUrw3BDV/view", "", "", 0], ["2026-04-06", "Tamil", "", "Ms.Vijaya", "https://drive.google.com/file/d/11dg55pjbF1DRt9qT34-omU4yGOAUV9UV/view", "", "", 0], ["2026-04-07", "History", "Medieval His", "Mr.Rahaman Basha", "", "", "", 0], ["2026-04-08", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1V1mRAUjJ43PuuZd3a3fqWIzXPLWzHydr/view", "", "", 0], ["2026-04-09", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/11Wv9WslieckOBAjZDEWEDcHMb7-_ieNW/view", "", "", 0], ["2026-04-10", "Environment", "", "Mr.Ashok", "", "", "", 0], ["2026-04-11", "History", "Medieval His", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1DFVWxIISnylVzyopkuBj2lxOZTd-d-8i/view", "Deccan Kingdoms TNPSC.pdf", "Telegram%20Desktop/Deccan%20Kingdoms%20TNPSC.pdf", 0], ["2026-04-11", "Aptitude", "LCM&HCF", "Ms.Divya", "https://drive.google.com/file/d/15kjnKEdUoTIYvFgmPTWqHiadeaoNh8tW/view", "", "", 0], ["2026-04-12", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/1Lk72ct0tI27XQ3_EqAvxqePoOpUIP3oL/view", "", "", 0], ["2026-04-12", "History", "Medieval His", "Mr.Rahaman Basha", "https://drive.google.com/file/d/18Y0iniUWjBOSZxIYKCgBOLQ3dUKxUn9k/view", "THE IMPERIAL CHOLAS TNPSC materials.pdf | The Maratha Empire.pdf | THE VIJAYANAGARA EMPIRE TNPSC material.pdf | THE BAHMANI KINGDOM TNPSC material.pdf | Mughals TNPSC material.pdf", "Telegram%20Desktop/THE%20IMPERIAL%20CHOLAS%20TNPSC%20materials.pdf | Telegram%20Desktop/The%20Maratha%20Empire.pdf | Telegram%20Desktop/THE%20VIJAYANAGARA%20EMPIRE%20TNPSC%20material.pdf | Telegram%20Desktop/THE%20BAHMANI%20KINGDOM%20TNPSC%20material.pdf | Telegram%20Desktop/Mughals%20TNPSC%20material.pdf", 0], ["2026-04-13", "Tamil", "", "Ms.Vijaya", "https://drive.google.com/file/d/1gRrF1KfiuaR3qeFUglpdaXqp_Maiaapz/view", "", "", 0], ["2026-04-14", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1RCpvlYbXXjYoC7YLcuLWka9yZkTBB34F/view", "", "", 0], ["2026-04-15", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/1QtQ0F_-CZZBxUxVUFvO9q9mP-469fZPJ/view", "CLASS 5.pptx | CLASS 4 (1).pptx | ECONOMY 6.pptx | Paper 3 (2).pdf", "https://1drv.ms/p/c/766fa90f85741ef0/IQBuf-We13kqTojNlJcVwMg_ARMaAg8cji8Z9LXbeiCVKL8?e=MABBKe | https://1drv.ms/p/c/766fa90f85741ef0/IQBKCLj-xWF4SrIzq7NNPc7RAYsrizDY1tq_OGFSRpcEG6I?e=iObik3 | https://1drv.ms/p/c/766fa90f85741ef0/IQB6VVSNO_RORp2w2sn99zzqAcHmY4vZzs2VUhvf4YDZAb0?e=EtbX6D | Telegram%20Desktop/Paper%203%20(2).pdf", 0], ["2026-04-16", "Environment", "", "Mr.Ashok", "", "", "", 0], ["2026-04-17", "History", "Ancient history", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1BgBv9dj8ygi7mz5riUEGt0X_-wPnAzkj/view", "", "", 0], ["2026-04-18", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/1iVTUsRLmrUeER2RAbalz-nRvMVe-efM9/view", "", "", 0], ["2026-04-19", "Science", "", "Mr.Gokul", "https://drive.google.com/file/d/1MohJCSqid2yQF7yNbW8XrmyioHVb2ZRA/view", "", "", 0], ["2026-04-20", "Geography", "", "Mr.Elango", "https://drive.google.com/file/d/1bCHEx-dvrG1EJjeyN_kmDejz8N1DLDPJ/view", "10th tamil geo comp.pdf | 10th geo comp.pdf", "Telegram%20Desktop/10th%20tamil%20geo%20comp.pdf | Telegram%20Desktop/10th%20geo%20comp.pdf", 0], ["2026-04-21", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1-G5j4Rrn6LQnIDi1bSzI1ExxWOFhD_FU/view", "", "", 0], ["2026-04-22", "Aptitude", "Ratio & Propotion", "Ms.Divya", "https://drive.google.com/file/d/1XbglSaIHSLfuw8fRX-ua8r_zvKWEMaq4/view", "", "", 0], ["2026-04-27", "Tamil", "", "Ms.Vijaya", "https://drive.google.com/file/d/1ie5GlOT7Vh714w_0NJXqpCWsmL4PVivY/view", "", "", 0], ["2026-04-28", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1IUkkkGRRFKeyfNEgIKt0P5PcWFp116b9/view", "", "", 0], ["2026-04-29", "Aptitude", "", "Ms.Divya", "https://drive.google.com/file/d/1Z0A782KrN7ZsyZH5ckueqUSUndmqBeGG/view", "", "", 0], ["2026-04-30", "Geography", "", "Mr.Elango", "https://drive.google.com/file/d/1sZUmBeJYSrPR5E5FXvhfuv7mtmAIpE7U/view", "", "", 0], ["2026-05-01", "DA in TN", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/14VlvfalhofekLYxe1F801Viw8AsxQgJI/view", "", "", 0], ["2026-05-02", "Ancient History", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1zeHpPpaGawNWNJjnu_85DztWCdzr0kI2/view", "Indus valley civilization.pptx | New socio religious reform movement.pptx | development administration.pdf", "https://1drv.ms/p/c/766fa90f85741ef0/IQD2fJe_Ock4TqPfM74uE87rAbRfDzHzh44cyjdVzQZ7qek?e=wzuUKi | https://1drv.ms/p/c/766fa90f85741ef0/IQDnjZcasWuXRYrnt5UdqC5MAcU1__Tow91GljpW3u22JHA?e=xiY0EM | Telegram%20Desktop/development%20administration.pdf", 0], ["2026-05-02", "Science", "", "Mr.Gokul", "", "", "", 0], ["2026-05-03", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/116bgGGQQ6xF9IEIu-o_Qlj82wij7ms0N/view", "", "", 0], ["2026-05-04", "Tamil", "", "Ms.Vijaya", "https://drive.google.com/file/d/1_taJtC3vk83Il2CrWbBr3OF-_pDtcB2q/view", "", "", 0], ["2026-05-05", "Geography", "", "Mr.Elango", "https://drive.google.com/file/d/1fm-jWM5iloYCvenKwgfhlu7fT8X3-saa/view", "", "", 0], ["2026-05-06", "Polity", "PCM", "Ms.Gayathri", "https://drive.google.com/file/d/1hd8WROFslOwZjk5R3k-ohezduktkyGJy/view", "", "", 0], ["2026-05-07", "DA in TN", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1ySUELz-f2UFdngDPl8cSxXEoXn8QxAty/view", "VEDIC AGE.pptx", "https://1drv.ms/p/c/766fa90f85741ef0/IQBPLSd5QmiDRb2NVt5qFW7PAUw6QG1BRxEByxcRkZA2ERE?e=Mw8cdG", 0], ["2026-05-08", "Environment", "", "Mr.Ashok", "", "", "", 0], ["2026-05-09", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/1pm_jhAhKuN90LUpZOqmIrk4IXC3r0p8Y/view", "", "", 0], ["2026-05-09", "Ancient History", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1FjKMSrcmzi-W3a00BvqVTop_KWe2gjYG/view", "", "", 0], ["2026-05-10", "Science", "", "Mr.Gokul", "", "", "", 0], ["2026-05-11", "Geography", "", "Mr.Elango", "https://drive.google.com/file/d/1Qo9D4A0Va0wuf-E6c_bSKD6x5yaK38dm/view", "", "", 0], ["2026-05-12", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1pPIJfeUl_msHY0572jfwkgkJWnXT0GLP/view", "", "", 0], ["2026-05-13", "Aptitude", "", "Ms.Divya", "https://drive.google.com/file/d/1qw0pVlL_MaBEgu-CC0LS7-qiOHrv7Dvs/view", "", "", 0], ["2026-05-14", "DA in TN", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1KyXiYg7z90UqZN3HMTXkA9xvg-K-Xr7p/view", "", "", 0], ["2026-05-15", "Environment", "", "Mr.Ashok", "", "", "", 0], ["2026-05-16", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/11zDyDkM556E3tpJyKtIuzCasKtSLlYF4/view", "", "", 0], ["2026-05-16", "Science", "", "Mr.Gokul", "", "", "", 0], ["2026-05-17", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1LlmkjvLWAA8YwmgHSnd27-IcSiii3fPk/view", "", "", 0], ["2026-05-18", "Tamil", "", "Ms.Vijaya", "https://drive.google.com/file/d/1uBwZKYiMj8NqyFPvcYdx9JIfVUr9tybS/view", "", "", 0], ["2026-05-19", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1l4Jijg0B9sEXjlAA25Qj6jHjnQp-hTuQ/view", "", "", 0], ["2026-05-20", "Geography", "", "Mr.Elango", "https://drive.google.com/file/d/13HCv2Ohs7U4HXdESZhyl3XUuYDLXw-xl/view", "", "", 0], ["2026-05-21", "Current Affairs", "", "Ms.Divya", "https://drive.google.com/file/d/16x2-zFQA48YbsLL4nIzka-7BKbqp1HLq/view", "", "", 0], ["2026-05-22", "Environment", "", "Mr.Ashok", "", "", "", 0], ["2026-05-23", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/17cdHOEBosc6e_-J2gLzGTN_ingN8iKub/view", "", "", 0], ["2026-05-24", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1sIJtn90j0nViUF5_KcC6y9ram7me37kz/view", "", "", 0], ["2026-05-25", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1BPhdrp9I1EAl4O68L65rrWFfWzQjFupd/view", "", "", 0], ["2026-05-28", "Aptitude", "", "Ms.Divya", "https://drive.google.com/file/d/1yTfIkXmqOD6cixTrFUa5jbxMtalAbpqk/view", "", "", 0], ["2026-05-29", "Current Affairs", "", "Ms.Divya", "https://drive.google.com/file/d/12ALXuKudxYR0vtPV3OASP4-OojkkRrB1/view", "", "", 0], ["2026-05-30", "Tamil", "", "Ms.Vijaya", "https://drive.google.com/file/d/1ylq8qzsTBsSPWCr3lZYFdsgIbi3EhKlX/view", "", "", 0], ["2026-06-01", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1_tVEDLOVNHTyl8EIfmCXqtxDS6Ldbi12/view", "", "", 0], ["2026-06-02", "Ancient History", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1I4f39CWx5q2OHFetBCDoMrShcsPD8--L/view", "", "", 0], ["2026-06-03", "", "", "", "", "", "", 0], ["2026-06-04", "Environment", "", "Mr.ashok", "", "", "", 0], ["2026-06-05", "Economics", "", "Mr.Gnanaprakesh", "https://drive.google.com/file/d/1-nmktWc4Bq6p4R7r-PDbwvw4Q0kTxUQ0/view", "", "", 0], ["2026-06-06", "Environment", "", "Mr.ashok", "", "", "", 0], ["2026-06-07", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/1if9nP-fH9D_P1AnN0QkoWAzDTTmsodsT/view", "", "", 0], ["2026-06-08", "Ancient History", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1QIHahyXabEECZT5fbsjztj-Mm06hyc-P/view", "", "", 0], ["2026-06-09", "Polity", "", "Mr.Kamaraj", "https://drive.google.com/file/d/1Y9jIYjYCUzDusDmU41asiY1b27vTOr8t/view", "", "", 0], ["2026-06-10", "", "Exam", "", "", "", "", 0], ["2026-06-11", "Environment", "", "Mr.Ashok", "", "", "", 0], ["2026-06-12", "Economics", "", "Mr.Ganaprakash", "", "", "", 0], ["2026-06-13", "Science", "", "Mr.Gokul", "", "", "", 0], ["2026-06-14", "INM", "", "Mr.Vignesh", "", "", "", 0], ["2026-06-15", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/1wZZ2LV6ZRoYFdqyS1-Kz_gZbagXjb3u6/view", "", "", 0], ["2026-06-16", "Ancient History", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1KDvNURpyXNmGtPWfGzOsREjEnGc_-rGw/view", "", "", 0], ["2026-06-17", "Aptitude", "", "Ms.Divya", "https://drive.google.com/file/d/1nE_LMvxr63d2i-pQmQiA2I4j3cXbLS7p/view", "", "", 0], ["2026-06-23", "Ancient History", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1KDvNURpyXNmGtPWfGzOsREjEnGc_-rGw/view", "", "", 0], ["2026-06-25", "Geography", "", "Mr.Elango", "https://drive.google.com/file/d/1tPZ0TGZWKYn0AIUNlT_9yjwB59HPLm9I/view", "", "", 0], ["2026-06-27", "Science", "", "Mr.Gokul", "https://drive.google.com/file/d/1euBgKQqrpnwMaUdFkFYRAcz5t5wJzPez/view", "", "", 0], ["2026-06-29", "Ancient History", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1BuM3ixUzAufp5AUiRz2MOvgZO3gTVdTV/view", "Gupta.pdf | Post Gupta.pdf", "Telegram%20Desktop/Gupta.pdf | Telegram%20Desktop/Post%20Gupta.pdf", 0], ["2026-06-30", "Tamil Society", "", "", "https://drive.google.com/file/d/1xMMvwakN6uG--NkpXFhpkFT3DKHJ0RE7/view", "", "", 0], ["2026-07-01", "", "", "", "", "", "", 0], ["2026-07-02", "Geography", "", "Mr.Elango", "https://drive.google.com/file/d/1xsJNyXmLRlU19-Z5WEN9Z27xLJ54FiP6/view", "", "", 0], ["2026-07-04", "Science", "", "Mr.Gokul", "https://drive.google.com/file/d/1o7a9oSuMY6U-_Fs9mrd-J0xeIT8Qtz6Y/view", "", "", 0], ["2026-07-06", "Geography", "", "Mr.Elango", "https://drive.google.com/file/d/1enovAV4q7ja2FRjrmeuHBl2v6uICtW7F/view", "", "", 0], ["2026-07-07", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/1i0cv1G-DTNeZjICqgjjHtV7PtH0yKRto/view", "", "", 0], ["2026-07-09", "Current Affairs", "", "Ms.Divya", "", "", "", 0], ["2026-07-10", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1u_4XTE7J3o6YmaD3Qi4L3drbuaMwbfHB/view", "", "", 0], ["2026-07-11", "Tamil Society", "", "", "https://drive.google.com/file/d/15G0dlEC2JrD0kMzzGXzHOwItX5dUVhct/view", "", "", 0], ["2026-07-12", "Science", "", "Mr.Gokul", "https://drive.google.com/file/d/1vh5q0QXTRVpTNCbViTy3FIVQm96VfHoF/view", "", "", 0], ["2026-07-13", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/1MTW8adjN_A1FXQeAzDfj5Td8dUey_RPt/view?pli=1", "", "", 0], ["2026-07-14", "Geography", "", "Mr.Elango", "https://drive.google.com/file/d/1h11oGdXKoObze_4zb71qqhLKFU4VLjxi/view", "", "", 0], ["2026-07-15", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/1CUliqmm9_Twi6i61cKkkdY8lIAIaLk74/view", "", "", 0], ["2026-07-16", "Current Affairs", "", "Ms.Divya", "https://drive.google.com/file/d/1XnPsgZAoQsXJuBL0_2feWOXfHWp5H7f-/view", "", "", 0], ["2026-07-17", "Tamil Society", "", "", "https://drive.google.com/file/d/1FTaZ94WDV5YwwAzdeWjexQB8v6xhr7zz/view", "", "", 0], ["2026-07-18", "Ancient History", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1ERL1aAmYacRiALZ4yaGenEhducc6IslQ/view", "", "", 0], ["2026-07-19", "Science", "", "Mr.Gokul", "https://drive.google.com/file/d/12czIPMOnqxmhZ2nWTlf14WlqGp_LZ24r/view", "", "", 0], ["2026-07-20", "DA in TN", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/15qu7IcMdOz5_9uXZnAyu5iBqHsrgXETy/view", "", "", 0], ["2026-07-21", "Aptitude", "", "Ms.Divya", "https://drive.google.com/file/d/1eSAnz69ryoGJ09QsiYioP-Nb41ZRCchE/view", "", "", 0], ["2026-07-22", "Tamil Society", "", "", "https://drive.google.com/file/d/1OCXKUXXuYvoIdjrAW2KzZBuzkIJaxEvJ/view", "", "", 0], ["2026-07-23", "Current Affairs", "", "Ms.Divya", "https://drive.google.com/file/d/1rAQdnnBxrqJzYKNG8BJ6bJ0zbM_rlrzO/view", "", "", 0], ["2026-07-25", "Social Issues", "", "", "https://drive.google.com/file/d/1upkMCLmpKtLbLrCWdsjqsMATQZuPl0b6/view", "", "", 0], ["2026-07-26", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/16G1Aq4MLIdd54onsEIXLpZY0KvBPndLm/view", "", "", 0], ["2026-07-27", "DA in TN", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1o4I0ocQ0aUOgpYONgu58HrCzo5Eumj2U/view", "", "", 0], ["2026-07-29", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1imq99aAZZB5-PJwH967ws4VzJtpaBFfh/view", "", "", 0], ["2026-07-30", "Aptitude", "", "Ms.Divya", "https://drive.google.com/file/d/1y9IqvsfBQ1gJd0CaP_fjxdFhrr97Mjfg/view", "", "", 0], ["2026-07-31", "Tamil Society", "", "", "https://drive.google.com/file/d/1MG05ZPCvdu2VK03ZsVCihLbti6Lli5Dt/view", "", "", 0], ["2026-08-01", "Science", "", "Mr.Gokul", "https://drive.google.com/file/d/12EyGl7CKBhs1BLNv5bITMcoN2bZ8En3V/view", "", "", 0], ["2026-08-02", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/1gesMEKGI4LVXtJOCYFCn1uSyP2savd-S/view", "", "", 0], ["2026-08-03", "Science & tech", "", "", "https://drive.google.com/file/d/1ewjlScBlYGpI6cRHipzvzxB5FuI1ymqE/view", "", "", 0], ["2026-08-04", "Tamil Society", "", "", "https://drive.google.com/file/d/1LJQ-x-ItmmeqF1gmyanFSYLD-czA12WW/view", "", "", 0], ["2026-08-05", "Ancient History", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1zXKTgmX8FpW8DitlKwS7-oa1r6YaTh5D/view", "", "", 0], ["2026-08-06", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/13E9bPK7qsQtwdjbu8Wc4Jc9zN0im9vIj/view", "", "", 0], ["2026-08-07", "Geography", "", "Mr.Elango", "https://drive.google.com/file/d/1K2evLZZh9MLlHLyLSL4fdrlTUZd51oHm/view", "", "", 0], ["2026-08-08", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/1CFC2ttnfiwuNNnpbtDnnZdaY99PBOGH2/view", "", "", 0], ["2026-08-09", "Science", "", "Mr.Gokul", "https://drive.google.com/file/d/1uFPhGf_Sa7e-fJoWiohA-JeIyJE8N7XJ/view", "", "", 0], ["2026-08-09", "Social Issues", "", "", "https://drive.google.com/file/d/1MlH7buTa6QE_y8c51PBg3eAcpSra0385/view", "", "", 0], ["2026-08-10", "DA in TN", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1nu26LoGP7SLCiXuOBOt8ey9NaEN7cEtl/view", "", "", 0], ["2026-08-11", "Ancient History", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1sen0aack40OaVkNQbvJpNASTONNBtBZH/view", "", "", 0], ["2026-08-12", "Ancient History", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1Cqzj08H2JUmdZC0OzQwOmnqpmJI8Ajyw/view", "", "", 0], ["2026-08-13", "Ancient History", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1lM8Zp6in8iNoIfQyjPse2J2B3EejkNsl/view", "", "", 0], ["2026-08-14", "Ancient History", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1w3LYLPl1c4C90v5aBB0a1llDFml7XF6T/view", "", "", 0], ["2026-08-15", "Science", "", "Mr.Gokul", "https://drive.google.com/file/d/1BuQC9-Utr0zMISj88nQ-dJygqAsEucVJ/view", "", "", 0], ["2026-08-16", "Social Issues", "", "", "https://drive.google.com/file/d/1mD9NcFte8kD-655uD15H6W0mMhHpU779/view", "", "", 0], ["2026-08-16", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/1maH560SIwYfZg3yxHWLrmcZPSD4MsqSA/view", "", "", 0], ["2026-08-17", "Tamil Society", "", "", "https://drive.google.com/file/d/1Jd2vQQkRSNP79NI8Hx7BlA4y4YwPfGDN/view", "", "", 0], ["2026-08-18", "Aptitude", "", "Ms.Divya", "https://drive.google.com/file/d/15wYIYnhF9kibSMkr45Xu4wx7Lk6UOify/view", "", "", 0], ["2026-08-19", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/1wk7cOisa4cCH3eLdBCdZ8UIaTLFQUapt/view", "", "", 0], ["2026-08-21", "DA in TN", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1uretHDfvp7pyFsxoxj_B3wlpcx-6avpr/view", "", "", 0], ["2026-08-22", "Science", "", "Mr.Gokul", "https://drive.google.com/file/d/1te6YrSe_yHmYCYIXxVdLdW8-QXHz9E_0/view", "", "", 0], ["2026-08-23", "Social Issues", "", "", "https://drive.google.com/file/d/190OvzKVzoEauFQhUKXCs4vlWxawHJ9NM/view", "", "", 0], ["2026-08-24", "Tamil Society", "", "", "https://drive.google.com/file/d/1lr1guBLDjALj2tQw_SpNrlqQFxYxIjUi/view", "", "", 0], ["2026-08-25", "General English", "", "", "https://drive.google.com/file/d/1e-UF60GgYtwXYY-X6eJVcmyBR2y0Ubjw/view", "", "", 0], ["2026-08-27", "DA in TN", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1Q9syufdn9PzMxZ34P57-6wVhziqlqM5o/view", "", "", 0], ["2026-08-28", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1eYJ22gYy0Z561DdfVmJAaP00XAXiBcT_/view", "", "", 0], ["2026-09-01", "DA in TN", "", "Mr.Rahaman Basha", "https://drive.google.com/file/d/1giOfEzextCOFooJja_dWmm3cKLH_X--J/view", "", "", 0], ["2026-09-02", "Aptitude", "", "Ms.Divya", "https://drive.google.com/file/d/1WIwFprjF1jMnFX9iXfK0Hj7RhsyxL1Fe/view", "", "", 0], ["2026-09-05", "Social Issues", "", "", "https://drive.google.com/file/d/1lXc70TgsjFgq7M2KS81gge5G29ERgffY/view", "", "", 0], ["2026-09-06", "Science", "", "Mr.Gokul", "https://drive.google.com/file/d/1zZ0fIXrx3AGld_4XNtVo5il8Fz1J9jq5/view", "", "", 0], ["2026-09-08", "Tamil Society", "", "", "https://drive.google.com/file/d/1PeyjQFU3qgaUtSivMTPv-j5Lqaev4nlN/view", "", "", 0], ["2026-09-10", "Aptitude", "", "Ms.Divya", "https://drive.google.com/file/d/1rE0pg2KEtBRwrpxIWhWz3O6-8RUHcYVq/view", "", "", 0], ["2026-09-11", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/1TsilmDL0yXTCSm8XDB5gEymXWVm6I_S4/view", "", "", 0], ["2026-09-15", "Medieval History", "", "", "https://drive.google.com/file/d/1oBfWQTWUCGwY89D-zFtFzWljpbcH0prM/view", "", "", 0], ["2026-09-15", "Current Affairs", "", "Ms.Divya", "https://drive.google.com/file/d/1pEF0siWYkIjPBeoA9-iPYHSVdxmTjuXU/view", "", "", 0], ["2026-09-16", "Current Affairs", "", "Ms.Divya", "https://drive.google.com/file/d/1KyeDL2tvQqdX8O8f_-ftLOeLLaLfnAqe/view", "", "", 0], ["2026-09-17", "Medieval History", "", "", "", "", "", 0], ["2026-09-18", "Medieval History", "", "", "https://drive.google.com/file/d/1fWPdiLT8Bey3H9kuF8FIMoRyUFRWSwIM/view", "", "", 0], ["2026-09-19", "Medieval History", "", "", "https://drive.google.com/file/d/1aPWFIAeSFL5SvHSRQ-7aZXYi9lF9eZSN/view", "", "", 0], ["2026-09-20", "INM", "", "Mr.Vignesh", "https://drive.google.com/file/d/1K2DTeybk6vNuXLDjw0NY8hAHMBdjh1TN/view", "", "", 0], ["2026-09-21", "Aptitude", "", "Ms.Divya", "https://drive.google.com/file/d/1FLCJAbTsa80yoau5M805KeiKxiLv7mIH/view", "", "", 0], ["2026-09-23", "Current Affairs", "", "Ms.Divya", "https://drive.google.com/file/d/1j5QaGdABpWaSNmcfyhLu3xj2kbCLZxvI/view", "", "", 0], ["2026-09-25", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1JQZndf5tYoJoTnZGNV8TMsNNVCLYRHoK/view", "", "", 0], ["2026-09-28", "Aptitude", "", "Ms.Divya", "https://drive.google.com/file/d/11oigFIC-4lHqmtdIJqE5KLD_vcSBJrO7/view", "", "", 0], ["2026-07-12", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/10ppnpc9_giQBEhqD_XCrmG3f5EOecwco/view", "", "", 0], ["2026-09-29", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/1dw_wxVC-MbOVA-SxOHjHV6c9Q2gIq6i8/view", "", "", 0], ["2026-09-30", "Polity", "", "Ms.Gayathri", "https://drive.google.com/file/d/1V-2hWrXNRFtrutvOh7jl0a_QJrU03rhf/view", "", "", 0], ["2026-10-02", "Tamil Society", "", "", "https://drive.google.com/file/d/1QXf7_vNKPKiUSbn-4Ib1J9IuhSoU1h_P/view", "", "", 0], ["2026-10-01", "General English", "", "", "https://drive.google.com/file/d/1FeVuF9y5XtN-dNKql7IRGOlGPN-d8P1v/view", "", "", 0], ["2026-10-06", "General English", "", "", "https://drive.google.com/file/d/1DyI1BSWQuQz2m5jUHNDkxqsKdYKiu5kT/view", "", "", 0], ["2026-10-05", "Tamil Society", "", "", "", "", "", 0], ["2026-10-08", "General English", "", "", "https://drive.google.com/file/d/17mQh63le7u1hn9mOQCsjZCCCmFvPZuOa/view", "", "", 0], ["2026-10-10", "Aptitude", "", "Ms.Divya", "https://drive.google.com/file/d/12rvNR9Toj6TGn1BBrdLNxbYPBXPL-yEB/view", "", "", 0], ["2026-10-12", "Tamil Society", "", "", "https://drive.google.com/file/d/1vgIRzl1HYgZtQGKYqAh0bBFoa4dIcGFE/view", "", "", 0], ["2026-10-19", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/1EgPfrCBwxuUzcS_j6Jcu3n4vPncxtQT9/view", "", "", 0], ["2026-10-23", "Aptitude", "", "Ms.Divya", "https://drive.google.com/file/d/1LI1XAEeS3bfuo0_wn9LyG4RNBJFnFH1L/view", "", "", 0], ["2026-10-27", "Tamil Society", "", "", "https://drive.google.com/file/d/1lIDcA7WmnUVlNeVmGmfazuLaMZnbSp9Z/view", "", "", 0], ["2026-10-28", "Geography", "", "Mr.Elango", "https://drive.google.com/file/d/1JX2jh_4eqwtfRTPEvr_PzLJfDDfAo4b9/view", "", "", 0], ["2026-11-03", "Economics", "", "Mr.Ganaprakash", "https://drive.google.com/file/d/1mR1qFLlF6jUC5T61hIP0HNahmAbL8Gyy/view", "", "", 0], ["2026-11-04", "Tamil Society", "", "", "https://drive.google.com/file/d/12vCNvHXrSHbk2eaZKCEgttZxIHSqTGbD/view", "", "", 0]], "e": [["2026-05-29", "TNPSC - 2026 - TEST - 01.pdf", "Telegram%20Desktop/TNPSC%20-%202026%20-%20TEST%20-%2001.pdf", "KIA UPSC OMR(100).pdf", "Telegram%20Desktop/KIA%20UPSC%20OMR(100).pdf", "TNPSC - 2026 - TEST - 01 ANSWER KEY.pdf", "Telegram%20Desktop/TNPSC%20-%202026%20-%20TEST%20-%2001%20ANSWER%20KEY.pdf", "", "", "", 0], ["2026-06-02", "TNPSC - 2026 - TEST - 02.pdf", "Telegram%20Desktop/TNPSC%20-%202026%20-%20TEST%20-%2002.pdf", "", "", "TNPSC - 2026 - TEST - 02 ANSWER KEY.pdf", "Telegram%20Desktop/TNPSC%20-%202026%20-%20TEST%20-%2002%20ANSWER%20KEY.pdf", "", "", "", 0], ["2026-06-03", "", "", "", "", "", "", "", "", "", 0]] };
+    const SEED_PAYLOAD = {"c":[["2026-01-27","Polity","Historical Background of indian Constitution","Ms.Gayathri","https://drive.google.com/file/d/1XjaPCSCBKeMldBe4tKo0-kB6E-nYznP8/view","Historical Background of the Constitution (1).pptx","https://1drv.ms/p/c/766fa90f85741ef0/IQDTipMXvT8qQr8ln2Qaz0VhAU4w3I5EegNcgxkE5ivl1e8?e=klqdTp",1],["2026-01-28","Polity","Historical Background of indian Constitution","Ms.Gayathri","https://drive.google.com/file/d/1uNqMgIYa1gznMWYIEFZk6QqfUjRjQbPU/view","","",1],["2026-01-31","INM","Advent of europeans","Mr.Vignesh","https://drive.google.com/file/d/1TzIh74aHmJFmMdQCo2vh_PmJ1AL9vFDp/view","","",0],["2026-02-02","Tamil","","Ms.Vijaya","https://drive.google.com/file/d/1Uh4Q542qWvtOgwsibyRBrqGOOtcHx06H/view","","",0],["2026-02-03","Polity","CA Adopted","Ms.Gayathri","https://drive.google.com/file/d/10LyJ2QOpVn4Q1s_K0A1R-lvCXE2XDn5x/view","","",1],["2026-02-05","Polity","Source of Constitution","Ms.Gayathri","https://drive.google.com/file/d/1MdZu2_fWhfWx8s0_WVfkl6x5Cqk7iYZx/view","","",1],["2026-02-07","INM","","Mr.Vignesh","https://drive.google.com/file/d/1M-iAhLIyLYWqCHDUmuOR9Cha2SLD9BIu/view","","",0],["2026-02-09","Polity","Part 1","Ms.Gayathri","https://drive.google.com/file/d/1rp4aU06aKJPQtxtb8jNAyuAba_UzCCmI/view","","",0],["2026-02-10","Tamil","","Ms.Vijaya","https://drive.google.com/file/d/1JEZueNz72fj4ll37bDTvTJGgk_RU45C0/view","","",0],["2026-02-12","Geography","Introduction","Mr.Bravin kumar","https://drive.google.com/file/d/1SspDicQqayED2JGqURrioSmcvsBse1P7/view","","",0],["2026-02-13","Current Affairs","","Ms.Divya","https://drive.google.com/file/d/14mz1DSCpu8Z1306DOg75jtzsMxzlffKS/view","","",0],["2026-02-14","INM","","Mr.Vignesh","https://drive.google.com/file/d/1nHXcO4hkV1JUghOaLuV6iZdJjAgAKqPi/view","","",0],["2026-02-15","Science","","Mr.Naganathan","https://drive.google.com/file/d/1vxpqDVSFb4Ckpg5e2nGCGz189gDIkt2-/view","","",0],["2026-02-16","Tamil","","Ms.Vijaya","https://drive.google.com/file/d/1y5XVqiHaXz-Ybzu1xC9IFgdMpLJZPFOq/view","","",0],["2026-02-18","Aptitude","Direction","Ms.Divya","https://drive.google.com/file/d/1DBRD3V4l06b-jumLGj8zacz50TB5MyMl/view","","",0],["2026-02-20","Geography","","Mr.Bravin kumar","https://drive.google.com/file/d/1bNJmVBrARjkPElWiO9aqTmNHCzZiSiPS/view","","",0],["2026-02-23","DA in TN","Introduction","Mr.Rahaman Basha","https://drive.google.com/file/d/1S6EoSsGz9XUDd_s3c1fVzBZdJ6aGqapJ/view","Where to study.docx","https://1drv.ms/w/c/766fa90f85741ef0/IQATNr9zXgyWQoAcLptCXQqjASWQbhYYOShYxV8SrQ1NhV8?e=spDIzy",0],["2026-02-24","Tamil","","Ms.Vijaya","https://drive.google.com/file/d/17aVlApdnBjTkAT5miCZgYwWbWkPxhQZi/view","","",0],["2026-02-25","Polity","Fundamental Rights","Ms.Gayathri","https://drive.google.com/file/d/1Otg9Tnz-QLHI-sfVbTFKE1f0LXOgol4Y/view","","",0],["2026-02-26","Aptitude","Number series","Ms.Divya","https://drive.google.com/file/d/1uMli8UtalnAwIjsxCZk7yR3KpVoVZEJh/view","","",0],["2026-02-28","INM","Islamic reform movements","Mr.Vignesh","https://drive.google.com/file/d/1Y03RrDw8jAYnebw22T9tt9ycUuiwyVBx/view","","",0],["2026-03-01","Science","","Mr.Gokul","https://drive.google.com/file/d/1oSbIhTumcpI_htJJmSPPpX5OEYeqEWbe/view","","",0],["2026-03-02","Tamil","","Ms.Vijaya","","","",0],["2026-03-03","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1-pzDFP6MCZcyptWifrMdrtQV53cU4bZw/view","","",0],["2026-03-04","DA in TN","","Mr.Rahaman Basha","https://drive.google.com/file/d/1vmo8Zd_AZhRN6Sk4GYRV2Ex54fWT14n-/view","","",0],["2026-03-05","Aptitude","","Ms.Divya","https://drive.google.com/file/d/1ToZ1EdQp0Zi1WuAUVWaaCIJDp2TcKewj/view","","",0],["2026-03-07","INM","","Mr.Vignesh","https://drive.google.com/file/d/15Bpt0A-kCHh0GGITlkx5M68Jr884fhYv/view","","",0],["2026-03-08","Science","","Mr.Naganathan","https://drive.google.com/file/d/1wF_c8OAmzgeiaRlu9D3vfWcEjtgQyO4M/view","","",0],["2026-03-09","Tamil","","Ms.Vijaya","https://drive.google.com/file/d/1gfm6FXogMseX9ZNzDLtMkGTTBMAWZrQq/view","","",0],["2026-03-10","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1m9_l3A9YzNErWWX8ePZlMX9qwlaFclpI/view","","",0],["2026-03-11","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/1QUHQLNYOg9-ktbPKGQUug5muPOmcdQOg/view","","",0],["2026-03-12","Ethics","","Mr.Kamaraj","https://drive.google.com/file/d/1IUArPWzYXy3lYBaHGSBQgvgvZvFigdVU/view","","",0],["2026-03-13","Environment","","Mr.Ashok","https://drive.google.com/file/d/1mtoGshC5nQb5wyOzpJW9fyVBXP9spal7/view","","",0],["2026-03-14","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1o9jba2h3SECGNb_ZAcyS6tafwRYNyFfs/view","","",0],["2026-03-15","INM","","Mr.Vignesh","https://drive.google.com/file/d/1paK25op5G7oIQL_PyTf0BefrXisQQi-J/view","","",0],["2026-03-16","Tamil","","Ms.Vijaya","https://drive.google.com/file/d/18_XEsAttK2YL29YAIs9EVHax_xCpCvWo/view","","",0],["2026-03-17","Polity","Making of constitution ,preamble,Union and it's territories","Ms.Gayathri","https://drive.google.com/file/d/1wwiLhllK3GpWlN6B-JxuEzySE9KVHMFg/view","","",0],["2026-03-18","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/1uUzrR7o_Cb9w3tuSmghU5aVrvnqvCQnc/view","","",0],["2026-03-19","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1kbi49qajX1oludf6ikL15kuTOWKFayJb/view","5_6172243384493678167.pdf | DOC-20260318-WA0027..pdf","Telegram%20Desktop/5_6172243384493678167.pdf | Telegram%20Desktop/DOC-20260318-WA0027..pdf",0],["2026-03-20","Environment","","Mr.Ashok","","","",0],["2026-03-21","INM","","Mr.Vignesh","https://drive.google.com/file/d/1X2zUXNcWLamBqdyrJxw5yT81yuX2pt_P/view","","",0],["2026-03-22","History changed (science)","","Mr.Naganathan","https://drive.google.com/file/d/1AIcNn70pr4JAJY6P0aFB69WN0rE8aLiL/view","","",0],["2026-03-23","Tamil","","Ms.Vijaya","","","",0],["2026-03-24","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1PcupFO0HMvqSc1ZCmEEvQ89QiwFnBMS8/view","","",0],["2026-03-25","Current Affairs","","Ms.Divya","https://drive.google.com/file/d/1_2GmJL0UBzT3WFGEv-WzYYzTYjfPbiLP/view","","",0],["2026-03-26","History","","Mr.Rahaman Basha","https://drive.google.com/file/d/1avxMiLu5RmLhYnbmC06XLd_x5s988eOC/view","","",0],["2026-03-27","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/1ra6c7svEfW-ntKfKq8_MPcC6jtXkNOUj/view","economy Presentation (1).pptx | ECO 3.pptx | Eco batch 2.pptx | CLASS 4.pptx","https://1drv.ms/p/c/766fa90f85741ef0/IQCTAH23onkyTImxICPXJbujAbZLsty37VDUhFyaH1p_5wo?e=0p2Fee | https://1drv.ms/p/c/766fa90f85741ef0/IQAucZXiWKmRQLjNYgBzHnx8AdVGVNPdVxBAkQ1JWGqAbTA?e=SxR1et | https://1drv.ms/p/c/766fa90f85741ef0/IQCntupnfSRjT5QEQGQMYwRGAdOP244Vxxhp3ZuFF3aSViw?e=nPypf9 | https://1drv.ms/p/c/766fa90f85741ef0/IQAHHbu14JNGQp8KP5SybeLhAdVuo7LveezwBzeOzqiuVB0?e=8NzsOG",0],["2026-03-28","INM","","Mr.Vignesh","","","",0],["2026-03-28","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1UMcOZC2eYoZIrPd-3waI8bBuFtyHwb4Z/view","","",0],["2026-03-29","Ethics","","Mr.Kamaraj","https://drive.google.com/file/d/1avxMiLu5RmLhYnbmC06XLd_x5s988eOC/view","","",0],["2026-03-30","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/14Qmofr7hrqLJ_jrkpW4YV437WnhsfhX3/view","","",0],["2026-03-31","Tamil","","Ms.Vijaya","https://drive.google.com/file/d/1cBUzjGhFf_4XjVHTsMPrFmiyUtWMWeVh/view","","",0],["2026-04-01","History","Medieval His","Mr.Rahaman Basha","https://drive.google.com/file/d/1SfBKQNNbJ4TwEYagGefX7SkJWoxL1On5/view","The Delhi Sultanate.pdf | RAJPUTS.pptx | conquest of arabs.pptx | DELHI SULTANS.pptx","Telegram%20Desktop/The%20Delhi%20Sultanate.pdf | https://1drv.ms/p/c/766fa90f85741ef0/IQAAPywDKyTITKek9iDd-8rzAQAzZol_IBEingC-YriWqco?e=fxNj6t | https://1drv.ms/p/c/766fa90f85741ef0/IQALxL9kGY6WTrUh-TXMLN0PAXlhqMGHdGEq_0P1ophRfqg?e=blCZpx | https://1drv.ms/p/c/766fa90f85741ef0/IQA7EdZDFdTOTKbqoFD3WoxeAW2bJPoMTSZDXWpSBEBTW1s?e=c5IJHb",0],["2026-04-02","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1TZGKO51MFqY1b6oWbXhkw3YNlfJke_1T/view","","",0],["2026-04-03","Environment","","Mr.Ashok","","","",0],["2026-04-04","History","Medieval His","Mr.Rahaman Basha","https://drive.google.com/file/d/1w1BwAkzmVFdPTOHgeRxi6cNW8QWapNhU/view","","",0],["2026-04-04","Aptitude","LCM&HCF","Ms.Divya","https://drive.google.com/file/d/1oiLiOoX-1b2zuZsnHGHnZXnPRfeSGyz8/view","","",0],["2026-04-05","INM","","Mr.Vignesh","https://drive.google.com/file/d/1rDJVfTXY9KspWb9TdycZPpmbrUrw3BDV/view","","",0],["2026-04-06","Tamil","","Ms.Vijaya","https://drive.google.com/file/d/11dg55pjbF1DRt9qT34-omU4yGOAUV9UV/view","","",0],["2026-04-07","History","Medieval His","Mr.Rahaman Basha","","","",0],["2026-04-08","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1V1mRAUjJ43PuuZd3a3fqWIzXPLWzHydr/view","","",0],["2026-04-09","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/11Wv9WslieckOBAjZDEWEDcHMb7-_ieNW/view","","",0],["2026-04-10","Environment","","Mr.Ashok","","","",0],["2026-04-11","History","Medieval His","Mr.Rahaman Basha","https://drive.google.com/file/d/1DFVWxIISnylVzyopkuBj2lxOZTd-d-8i/view","Deccan Kingdoms TNPSC.pdf","Telegram%20Desktop/Deccan%20Kingdoms%20TNPSC.pdf",0],["2026-04-11","Aptitude","LCM&HCF","Ms.Divya","https://drive.google.com/file/d/15kjnKEdUoTIYvFgmPTWqHiadeaoNh8tW/view","","",0],["2026-04-12","INM","","Mr.Vignesh","https://drive.google.com/file/d/1Lk72ct0tI27XQ3_EqAvxqePoOpUIP3oL/view","","",0],["2026-04-12","History","Medieval His","Mr.Rahaman Basha","https://drive.google.com/file/d/18Y0iniUWjBOSZxIYKCgBOLQ3dUKxUn9k/view","THE IMPERIAL CHOLAS TNPSC materials.pdf | The Maratha Empire.pdf | THE VIJAYANAGARA EMPIRE TNPSC material.pdf | THE BAHMANI KINGDOM TNPSC material.pdf | Mughals TNPSC material.pdf","Telegram%20Desktop/THE%20IMPERIAL%20CHOLAS%20TNPSC%20materials.pdf | Telegram%20Desktop/The%20Maratha%20Empire.pdf | Telegram%20Desktop/THE%20VIJAYANAGARA%20EMPIRE%20TNPSC%20material.pdf | Telegram%20Desktop/THE%20BAHMANI%20KINGDOM%20TNPSC%20material.pdf | Telegram%20Desktop/Mughals%20TNPSC%20material.pdf",0],["2026-04-13","Tamil","","Ms.Vijaya","https://drive.google.com/file/d/1gRrF1KfiuaR3qeFUglpdaXqp_Maiaapz/view","","",0],["2026-04-14","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1RCpvlYbXXjYoC7YLcuLWka9yZkTBB34F/view","","",0],["2026-04-15","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/1QtQ0F_-CZZBxUxVUFvO9q9mP-469fZPJ/view","CLASS 5.pptx | CLASS 4 (1).pptx | ECONOMY 6.pptx | Paper 3 (2).pdf","https://1drv.ms/p/c/766fa90f85741ef0/IQBuf-We13kqTojNlJcVwMg_ARMaAg8cji8Z9LXbeiCVKL8?e=MABBKe | https://1drv.ms/p/c/766fa90f85741ef0/IQBKCLj-xWF4SrIzq7NNPc7RAYsrizDY1tq_OGFSRpcEG6I?e=iObik3 | https://1drv.ms/p/c/766fa90f85741ef0/IQB6VVSNO_RORp2w2sn99zzqAcHmY4vZzs2VUhvf4YDZAb0?e=EtbX6D | Telegram%20Desktop/Paper%203%20(2).pdf",0],["2026-04-16","Environment","","Mr.Ashok","","","",0],["2026-04-17","History","Ancient history","Mr.Rahaman Basha","https://drive.google.com/file/d/1BgBv9dj8ygi7mz5riUEGt0X_-wPnAzkj/view","","",0],["2026-04-18","INM","","Mr.Vignesh","https://drive.google.com/file/d/1iVTUsRLmrUeER2RAbalz-nRvMVe-efM9/view","","",0],["2026-04-19","Science","","Mr.Gokul","https://drive.google.com/file/d/1MohJCSqid2yQF7yNbW8XrmyioHVb2ZRA/view","","",0],["2026-04-20","Geography","","Mr.Elango","https://drive.google.com/file/d/1bCHEx-dvrG1EJjeyN_kmDejz8N1DLDPJ/view","10th tamil geo comp.pdf | 10th geo comp.pdf","Telegram%20Desktop/10th%20tamil%20geo%20comp.pdf | Telegram%20Desktop/10th%20geo%20comp.pdf",0],["2026-04-21","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1-G5j4Rrn6LQnIDi1bSzI1ExxWOFhD_FU/view","","",0],["2026-04-22","Aptitude","Ratio & Propotion","Ms.Divya","https://drive.google.com/file/d/1XbglSaIHSLfuw8fRX-ua8r_zvKWEMaq4/view","","",0],["2026-04-27","Tamil","","Ms.Vijaya","https://drive.google.com/file/d/1ie5GlOT7Vh714w_0NJXqpCWsmL4PVivY/view","","",0],["2026-04-28","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1IUkkkGRRFKeyfNEgIKt0P5PcWFp116b9/view","","",0],["2026-04-29","Aptitude","","Ms.Divya","https://drive.google.com/file/d/1Z0A782KrN7ZsyZH5ckueqUSUndmqBeGG/view","","",0],["2026-04-30","Geography","","Mr.Elango","https://drive.google.com/file/d/1sZUmBeJYSrPR5E5FXvhfuv7mtmAIpE7U/view","","",0],["2026-05-01","DA in TN","","Mr.Rahaman Basha","https://drive.google.com/file/d/14VlvfalhofekLYxe1F801Viw8AsxQgJI/view","","",0],["2026-05-02","Ancient History","","Mr.Rahaman Basha","https://drive.google.com/file/d/1zeHpPpaGawNWNJjnu_85DztWCdzr0kI2/view","Indus valley civilization.pptx | New socio religious reform movement.pptx | development administration.pdf","https://1drv.ms/p/c/766fa90f85741ef0/IQD2fJe_Ock4TqPfM74uE87rAbRfDzHzh44cyjdVzQZ7qek?e=wzuUKi | https://1drv.ms/p/c/766fa90f85741ef0/IQDnjZcasWuXRYrnt5UdqC5MAcU1__Tow91GljpW3u22JHA?e=xiY0EM | Telegram%20Desktop/development%20administration.pdf",0],["2026-05-02","Science","","Mr.Gokul","","","",0],["2026-05-03","INM","","Mr.Vignesh","https://drive.google.com/file/d/116bgGGQQ6xF9IEIu-o_Qlj82wij7ms0N/view","","",0],["2026-05-04","Tamil","","Ms.Vijaya","https://drive.google.com/file/d/1_taJtC3vk83Il2CrWbBr3OF-_pDtcB2q/view","","",0],["2026-05-05","Geography","","Mr.Elango","https://drive.google.com/file/d/1fm-jWM5iloYCvenKwgfhlu7fT8X3-saa/view","","",0],["2026-05-06","Polity","PCM","Ms.Gayathri","https://drive.google.com/file/d/1hd8WROFslOwZjk5R3k-ohezduktkyGJy/view","","",0],["2026-05-07","DA in TN","","Mr.Rahaman Basha","https://drive.google.com/file/d/1ySUELz-f2UFdngDPl8cSxXEoXn8QxAty/view","VEDIC AGE.pptx","https://1drv.ms/p/c/766fa90f85741ef0/IQBPLSd5QmiDRb2NVt5qFW7PAUw6QG1BRxEByxcRkZA2ERE?e=Mw8cdG",0],["2026-05-08","Environment","","Mr.Ashok","","","",0],["2026-05-09","INM","","Mr.Vignesh","https://drive.google.com/file/d/1pm_jhAhKuN90LUpZOqmIrk4IXC3r0p8Y/view","","",0],["2026-05-09","Ancient History","","Mr.Rahaman Basha","https://drive.google.com/file/d/1FjKMSrcmzi-W3a00BvqVTop_KWe2gjYG/view","","",0],["2026-05-10","Science","","Mr.Gokul","","","",0],["2026-05-11","Geography","","Mr.Elango","https://drive.google.com/file/d/1Qo9D4A0Va0wuf-E6c_bSKD6x5yaK38dm/view","","",0],["2026-05-12","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1pPIJfeUl_msHY0572jfwkgkJWnXT0GLP/view","","",0],["2026-05-13","Aptitude","","Ms.Divya","https://drive.google.com/file/d/1qw0pVlL_MaBEgu-CC0LS7-qiOHrv7Dvs/view","","",0],["2026-05-14","DA in TN","","Mr.Rahaman Basha","https://drive.google.com/file/d/1KyXiYg7z90UqZN3HMTXkA9xvg-K-Xr7p/view","","",0],["2026-05-15","Environment","","Mr.Ashok","","","",0],["2026-05-16","INM","","Mr.Vignesh","https://drive.google.com/file/d/11zDyDkM556E3tpJyKtIuzCasKtSLlYF4/view","","",0],["2026-05-16","Science","","Mr.Gokul","","","",0],["2026-05-17","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1LlmkjvLWAA8YwmgHSnd27-IcSiii3fPk/view","","",0],["2026-05-18","Tamil","","Ms.Vijaya","https://drive.google.com/file/d/1uBwZKYiMj8NqyFPvcYdx9JIfVUr9tybS/view","","",0],["2026-05-19","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1l4Jijg0B9sEXjlAA25Qj6jHjnQp-hTuQ/view","","",0],["2026-05-20","Geography","","Mr.Elango","https://drive.google.com/file/d/13HCv2Ohs7U4HXdESZhyl3XUuYDLXw-xl/view","","",0],["2026-05-21","Current Affairs","","Ms.Divya","https://drive.google.com/file/d/16x2-zFQA48YbsLL4nIzka-7BKbqp1HLq/view","","",0],["2026-05-22","Environment","","Mr.Ashok","","","",0],["2026-05-23","Polity","","Ms.Gayathri","https://drive.google.com/file/d/17cdHOEBosc6e_-J2gLzGTN_ingN8iKub/view","","",0],["2026-05-24","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1sIJtn90j0nViUF5_KcC6y9ram7me37kz/view","","",0],["2026-05-25","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1BPhdrp9I1EAl4O68L65rrWFfWzQjFupd/view","","",0],["2026-05-28","Aptitude","","Ms.Divya","https://drive.google.com/file/d/1yTfIkXmqOD6cixTrFUa5jbxMtalAbpqk/view","","",0],["2026-05-29","Current Affairs","","Ms.Divya","https://drive.google.com/file/d/12ALXuKudxYR0vtPV3OASP4-OojkkRrB1/view","","",0],["2026-05-30","Tamil","","Ms.Vijaya","https://drive.google.com/file/d/1ylq8qzsTBsSPWCr3lZYFdsgIbi3EhKlX/view","","",0],["2026-06-01","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1_tVEDLOVNHTyl8EIfmCXqtxDS6Ldbi12/view","","",0],["2026-06-02","Ancient History","","Mr.Rahaman Basha","https://drive.google.com/file/d/1I4f39CWx5q2OHFetBCDoMrShcsPD8--L/view","","",0],["2026-06-03","","","","","","",0],["2026-06-04","Environment","","Mr.ashok","","","",0],["2026-06-05","Economics","","Mr.Gnanaprakesh","https://drive.google.com/file/d/1-nmktWc4Bq6p4R7r-PDbwvw4Q0kTxUQ0/view","","",0],["2026-06-06","Environment","","Mr.ashok","","","",0],["2026-06-07","INM","","Mr.Vignesh","https://drive.google.com/file/d/1if9nP-fH9D_P1AnN0QkoWAzDTTmsodsT/view","","",0],["2026-06-08","Ancient History","","Mr.Rahaman Basha","https://drive.google.com/file/d/1QIHahyXabEECZT5fbsjztj-Mm06hyc-P/view","","",0],["2026-06-09","Polity","","Mr.Kamaraj","https://drive.google.com/file/d/1Y9jIYjYCUzDusDmU41asiY1b27vTOr8t/view","","",0],["2026-06-10","","Exam","","","","",0],["2026-06-11","Environment","","Mr.Ashok","","","",0],["2026-06-12","Economics","","Mr.Ganaprakash","","","",0],["2026-06-13","Science","","Mr.Gokul","","","",0],["2026-06-14","INM","","Mr.Vignesh","","","",0],["2026-06-15","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/1wZZ2LV6ZRoYFdqyS1-Kz_gZbagXjb3u6/view","","",0],["2026-06-16","Ancient History","","Mr.Rahaman Basha","https://drive.google.com/file/d/1KDvNURpyXNmGtPWfGzOsREjEnGc_-rGw/view","","",0],["2026-06-17","Aptitude","","Ms.Divya","https://drive.google.com/file/d/1nE_LMvxr63d2i-pQmQiA2I4j3cXbLS7p/view","","",0],["2026-06-23","Ancient History","","Mr.Rahaman Basha","https://drive.google.com/file/d/1KDvNURpyXNmGtPWfGzOsREjEnGc_-rGw/view","","",0],["2026-06-25","Geography","","Mr.Elango","https://drive.google.com/file/d/1tPZ0TGZWKYn0AIUNlT_9yjwB59HPLm9I/view","","",0],["2026-06-27","Science","","Mr.Gokul","https://drive.google.com/file/d/1euBgKQqrpnwMaUdFkFYRAcz5t5wJzPez/view","","",0],["2026-06-29","Ancient History","","Mr.Rahaman Basha","https://drive.google.com/file/d/1BuM3ixUzAufp5AUiRz2MOvgZO3gTVdTV/view","Gupta.pdf | Post Gupta.pdf","Telegram%20Desktop/Gupta.pdf | Telegram%20Desktop/Post%20Gupta.pdf",0],["2026-06-30","Tamil Society","","","https://drive.google.com/file/d/1xMMvwakN6uG--NkpXFhpkFT3DKHJ0RE7/view","","",0],["2026-07-01","","","","","","",0],["2026-07-02","Geography","","Mr.Elango","https://drive.google.com/file/d/1xsJNyXmLRlU19-Z5WEN9Z27xLJ54FiP6/view","","",0],["2026-07-04","Science","","Mr.Gokul","https://drive.google.com/file/d/1o7a9oSuMY6U-_Fs9mrd-J0xeIT8Qtz6Y/view","","",0],["2026-07-06","Geography","","Mr.Elango","https://drive.google.com/file/d/1enovAV4q7ja2FRjrmeuHBl2v6uICtW7F/view","","",0],["2026-07-07","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/1i0cv1G-DTNeZjICqgjjHtV7PtH0yKRto/view","","",0],["2026-07-09","Current Affairs","","Ms.Divya","","","",0],["2026-07-10","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1u_4XTE7J3o6YmaD3Qi4L3drbuaMwbfHB/view","","",0],["2026-07-11","Tamil Society","","","https://drive.google.com/file/d/15G0dlEC2JrD0kMzzGXzHOwItX5dUVhct/view","","",0],["2026-07-12","Science","","Mr.Gokul","https://drive.google.com/file/d/1vh5q0QXTRVpTNCbViTy3FIVQm96VfHoF/view","","",0],["2026-07-13","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/1MTW8adjN_A1FXQeAzDfj5Td8dUey_RPt/view?pli=1","","",0],["2026-07-14","Geography","","Mr.Elango","https://drive.google.com/file/d/1h11oGdXKoObze_4zb71qqhLKFU4VLjxi/view","","",0],["2026-07-15","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/1CUliqmm9_Twi6i61cKkkdY8lIAIaLk74/view","","",0],["2026-07-16","Current Affairs","","Ms.Divya","https://drive.google.com/file/d/1XnPsgZAoQsXJuBL0_2feWOXfHWp5H7f-/view","","",0],["2026-07-17","Tamil Society","","","https://drive.google.com/file/d/1FTaZ94WDV5YwwAzdeWjexQB8v6xhr7zz/view","","",0],["2026-07-18","Ancient History","","Mr.Rahaman Basha","https://drive.google.com/file/d/1ERL1aAmYacRiALZ4yaGenEhducc6IslQ/view","","",0],["2026-07-19","Science","","Mr.Gokul","https://drive.google.com/file/d/12czIPMOnqxmhZ2nWTlf14WlqGp_LZ24r/view","","",0],["2026-07-20","DA in TN","","Mr.Rahaman Basha","https://drive.google.com/file/d/15qu7IcMdOz5_9uXZnAyu5iBqHsrgXETy/view","","",0],["2026-07-21","Aptitude","","Ms.Divya","https://drive.google.com/file/d/1eSAnz69ryoGJ09QsiYioP-Nb41ZRCchE/view","","",0],["2026-07-22","Tamil Society","","","https://drive.google.com/file/d/1OCXKUXXuYvoIdjrAW2KzZBuzkIJaxEvJ/view","","",0],["2026-07-23","Current Affairs","","Ms.Divya","https://drive.google.com/file/d/1rAQdnnBxrqJzYKNG8BJ6bJ0zbM_rlrzO/view","","",0],["2026-07-25","Social Issues","","","https://drive.google.com/file/d/1upkMCLmpKtLbLrCWdsjqsMATQZuPl0b6/view","","",0],["2026-07-26","INM","","Mr.Vignesh","https://drive.google.com/file/d/16G1Aq4MLIdd54onsEIXLpZY0KvBPndLm/view","","",0],["2026-07-27","DA in TN","","Mr.Rahaman Basha","https://drive.google.com/file/d/1o4I0ocQ0aUOgpYONgu58HrCzo5Eumj2U/view","","",0],["2026-07-29","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1imq99aAZZB5-PJwH967ws4VzJtpaBFfh/view","","",0],["2026-07-30","Aptitude","","Ms.Divya","https://drive.google.com/file/d/1y9IqvsfBQ1gJd0CaP_fjxdFhrr97Mjfg/view","","",0],["2026-07-31","Tamil Society","","","https://drive.google.com/file/d/1MG05ZPCvdu2VK03ZsVCihLbti6Lli5Dt/view","","",0],["2026-08-01","Science","","Mr.Gokul","https://drive.google.com/file/d/12EyGl7CKBhs1BLNv5bITMcoN2bZ8En3V/view","","",0],["2026-08-02","INM","","Mr.Vignesh","https://drive.google.com/file/d/1gesMEKGI4LVXtJOCYFCn1uSyP2savd-S/view","","",0],["2026-08-03","Science & tech","","","https://drive.google.com/file/d/1ewjlScBlYGpI6cRHipzvzxB5FuI1ymqE/view","","",0],["2026-08-04","Tamil Society","","","https://drive.google.com/file/d/1LJQ-x-ItmmeqF1gmyanFSYLD-czA12WW/view","","",0],["2026-08-05","Ancient History","","Mr.Rahaman Basha","https://drive.google.com/file/d/1zXKTgmX8FpW8DitlKwS7-oa1r6YaTh5D/view","","",0],["2026-08-06","Polity","","Ms.Gayathri","https://drive.google.com/file/d/13E9bPK7qsQtwdjbu8Wc4Jc9zN0im9vIj/view","","",0],["2026-08-07","Geography","","Mr.Elango","https://drive.google.com/file/d/1K2evLZZh9MLlHLyLSL4fdrlTUZd51oHm/view","","",0],["2026-08-08","INM","","Mr.Vignesh","https://drive.google.com/file/d/1CFC2ttnfiwuNNnpbtDnnZdaY99PBOGH2/view","","",0],["2026-08-09","Science","","Mr.Gokul","https://drive.google.com/file/d/1uFPhGf_Sa7e-fJoWiohA-JeIyJE8N7XJ/view","","",0],["2026-08-09","Social Issues","","","https://drive.google.com/file/d/1MlH7buTa6QE_y8c51PBg3eAcpSra0385/view","","",0],["2026-08-10","DA in TN","","Mr.Rahaman Basha","https://drive.google.com/file/d/1nu26LoGP7SLCiXuOBOt8ey9NaEN7cEtl/view","","",0],["2026-08-11","Ancient History","","Mr.Rahaman Basha","https://drive.google.com/file/d/1sen0aack40OaVkNQbvJpNASTONNBtBZH/view","","",0],["2026-08-12","Ancient History","","Mr.Rahaman Basha","https://drive.google.com/file/d/1Cqzj08H2JUmdZC0OzQwOmnqpmJI8Ajyw/view","","",0],["2026-08-13","Ancient History","","Mr.Rahaman Basha","https://drive.google.com/file/d/1lM8Zp6in8iNoIfQyjPse2J2B3EejkNsl/view","","",0],["2026-08-14","Ancient History","","Mr.Rahaman Basha","https://drive.google.com/file/d/1w3LYLPl1c4C90v5aBB0a1llDFml7XF6T/view","","",0],["2026-08-15","Science","","Mr.Gokul","https://drive.google.com/file/d/1BuQC9-Utr0zMISj88nQ-dJygqAsEucVJ/view","","",0],["2026-08-16","Social Issues","","","https://drive.google.com/file/d/1mD9NcFte8kD-655uD15H6W0mMhHpU779/view","","",0],["2026-08-16","INM","","Mr.Vignesh","https://drive.google.com/file/d/1maH560SIwYfZg3yxHWLrmcZPSD4MsqSA/view","","",0],["2026-08-17","Tamil Society","","","https://drive.google.com/file/d/1Jd2vQQkRSNP79NI8Hx7BlA4y4YwPfGDN/view","","",0],["2026-08-18","Aptitude","","Ms.Divya","https://drive.google.com/file/d/15wYIYnhF9kibSMkr45Xu4wx7Lk6UOify/view","","",0],["2026-08-19","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/1wk7cOisa4cCH3eLdBCdZ8UIaTLFQUapt/view","","",0],["2026-08-21","DA in TN","","Mr.Rahaman Basha","https://drive.google.com/file/d/1uretHDfvp7pyFsxoxj_B3wlpcx-6avpr/view","","",0],["2026-08-22","Science","","Mr.Gokul","https://drive.google.com/file/d/1te6YrSe_yHmYCYIXxVdLdW8-QXHz9E_0/view","","",0],["2026-08-23","Social Issues","","","https://drive.google.com/file/d/190OvzKVzoEauFQhUKXCs4vlWxawHJ9NM/view","","",0],["2026-08-24","Tamil Society","","","https://drive.google.com/file/d/1lr1guBLDjALj2tQw_SpNrlqQFxYxIjUi/view","","",0],["2026-08-25","General English","","","https://drive.google.com/file/d/1e-UF60GgYtwXYY-X6eJVcmyBR2y0Ubjw/view","","",0],["2026-08-27","DA in TN","","Mr.Rahaman Basha","https://drive.google.com/file/d/1Q9syufdn9PzMxZ34P57-6wVhziqlqM5o/view","","",0],["2026-08-28","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1eYJ22gYy0Z561DdfVmJAaP00XAXiBcT_/view","","",0],["2026-09-01","DA in TN","","Mr.Rahaman Basha","https://drive.google.com/file/d/1giOfEzextCOFooJja_dWmm3cKLH_X--J/view","","",0],["2026-09-02","Aptitude","","Ms.Divya","https://drive.google.com/file/d/1WIwFprjF1jMnFX9iXfK0Hj7RhsyxL1Fe/view","","",0],["2026-09-05","Social Issues","","","https://drive.google.com/file/d/1lXc70TgsjFgq7M2KS81gge5G29ERgffY/view","","",0],["2026-09-06","Science","","Mr.Gokul","https://drive.google.com/file/d/1zZ0fIXrx3AGld_4XNtVo5il8Fz1J9jq5/view","","",0],["2026-09-08","Tamil Society","","","https://drive.google.com/file/d/1PeyjQFU3qgaUtSivMTPv-j5Lqaev4nlN/view","","",0],["2026-09-10","Aptitude","","Ms.Divya","https://drive.google.com/file/d/1rE0pg2KEtBRwrpxIWhWz3O6-8RUHcYVq/view","","",0],["2026-09-11","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/1TsilmDL0yXTCSm8XDB5gEymXWVm6I_S4/view","","",0],["2026-09-15","Medieval History","","","https://drive.google.com/file/d/1oBfWQTWUCGwY89D-zFtFzWljpbcH0prM/view","","",0],["2026-09-15","Current Affairs","","Ms.Divya","https://drive.google.com/file/d/1pEF0siWYkIjPBeoA9-iPYHSVdxmTjuXU/view","","",0],["2026-09-16","Current Affairs","","Ms.Divya","https://drive.google.com/file/d/1KyeDL2tvQqdX8O8f_-ftLOeLLaLfnAqe/view","","",0],["2026-09-17","Medieval History","","","","","",0],["2026-09-18","Medieval History","","","https://drive.google.com/file/d/1fWPdiLT8Bey3H9kuF8FIMoRyUFRWSwIM/view","","",0],["2026-09-19","Medieval History","","","https://drive.google.com/file/d/1aPWFIAeSFL5SvHSRQ-7aZXYi9lF9eZSN/view","","",0],["2026-09-20","INM","","Mr.Vignesh","https://drive.google.com/file/d/1K2DTeybk6vNuXLDjw0NY8hAHMBdjh1TN/view","","",0],["2026-09-21","Aptitude","","Ms.Divya","https://drive.google.com/file/d/1FLCJAbTsa80yoau5M805KeiKxiLv7mIH/view","","",0],["2026-09-23","Current Affairs","","Ms.Divya","https://drive.google.com/file/d/1j5QaGdABpWaSNmcfyhLu3xj2kbCLZxvI/view","","",0],["2026-09-25","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1JQZndf5tYoJoTnZGNV8TMsNNVCLYRHoK/view","","",0],["2026-09-28","Aptitude","","Ms.Divya","https://drive.google.com/file/d/11oigFIC-4lHqmtdIJqE5KLD_vcSBJrO7/view","","",0],["2026-07-12","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/10ppnpc9_giQBEhqD_XCrmG3f5EOecwco/view","","",0],["2026-09-29","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/1dw_wxVC-MbOVA-SxOHjHV6c9Q2gIq6i8/view","","",0],["2026-09-30","Polity","","Ms.Gayathri","https://drive.google.com/file/d/1V-2hWrXNRFtrutvOh7jl0a_QJrU03rhf/view","","",0],["2026-10-02","Tamil Society","","","https://drive.google.com/file/d/1QXf7_vNKPKiUSbn-4Ib1J9IuhSoU1h_P/view","","",0],["2026-10-01","General English","","","https://drive.google.com/file/d/1FeVuF9y5XtN-dNKql7IRGOlGPN-d8P1v/view","","",0],["2026-10-06","General English","","","https://drive.google.com/file/d/1DyI1BSWQuQz2m5jUHNDkxqsKdYKiu5kT/view","","",0],["2026-10-05","Tamil Society","","","","","",0],["2026-10-08","General English","","","https://drive.google.com/file/d/17mQh63le7u1hn9mOQCsjZCCCmFvPZuOa/view","","",0],["2026-10-10","Aptitude","","Ms.Divya","https://drive.google.com/file/d/12rvNR9Toj6TGn1BBrdLNxbYPBXPL-yEB/view","","",0],["2026-10-12","Tamil Society","","","https://drive.google.com/file/d/1vgIRzl1HYgZtQGKYqAh0bBFoa4dIcGFE/view","","",0],["2026-10-19","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/1EgPfrCBwxuUzcS_j6Jcu3n4vPncxtQT9/view","","",0],["2026-10-23","Aptitude","","Ms.Divya","https://drive.google.com/file/d/1LI1XAEeS3bfuo0_wn9LyG4RNBJFnFH1L/view","","",0],["2026-10-27","Tamil Society","","","https://drive.google.com/file/d/1lIDcA7WmnUVlNeVmGmfazuLaMZnbSp9Z/view","","",0],["2026-10-28","Geography","","Mr.Elango","https://drive.google.com/file/d/1JX2jh_4eqwtfRTPEvr_PzLJfDDfAo4b9/view","","",0],["2026-11-03","Economics","","Mr.Ganaprakash","https://drive.google.com/file/d/1mR1qFLlF6jUC5T61hIP0HNahmAbL8Gyy/view","","",0],["2026-11-04","Tamil Society","","","https://drive.google.com/file/d/12vCNvHXrSHbk2eaZKCEgttZxIHSqTGbD/view","","",0]],"e":[["2026-05-29","TNPSC - 2026 - TEST - 01.pdf","Telegram%20Desktop/TNPSC%20-%202026%20-%20TEST%20-%2001.pdf","KIA UPSC OMR(100).pdf","Telegram%20Desktop/KIA%20UPSC%20OMR(100).pdf","TNPSC - 2026 - TEST - 01 ANSWER KEY.pdf","Telegram%20Desktop/TNPSC%20-%202026%20-%20TEST%20-%2001%20ANSWER%20KEY.pdf","","","",0],["2026-06-02","TNPSC - 2026 - TEST - 02.pdf","Telegram%20Desktop/TNPSC%20-%202026%20-%20TEST%20-%2002.pdf","","","TNPSC - 2026 - TEST - 02 ANSWER KEY.pdf","Telegram%20Desktop/TNPSC%20-%202026%20-%20TEST%20-%2002%20ANSWER%20KEY.pdf","","","",0],["2026-06-03","","","","","","","","","",0]]};
 
     let appState = {
       classes: [],
-      exams: []
+      exams: [],
+      subjects: []
     };
     let currentTab = 'classes';
     let showAllSubjects = false;
+    let editingSubjectIndex = -1;
 
     const STORAGE_KEY = 'tnpsc_study_tracker_v1';
     const CLOUD_CFG_KEY = 'tnpsc_supabase_cfg_v1';
+    const THEME_KEY = 'tnpsc_theme_v1';
+
+    // Theme Management (Light / Dark)
+    function applyTheme(theme) {
+      const root = document.documentElement;
+      const isDark = theme === 'dark';
+      root.classList.toggle('dark', isDark);
+      const sunIcon = document.getElementById('themeIconSun');
+      const moonIcon = document.getElementById('themeIconMoon');
+      const label = document.getElementById('themeLabel');
+      if (sunIcon && moonIcon && label) {
+        sunIcon.classList.toggle('hidden', !isDark);
+        moonIcon.classList.toggle('hidden', isDark);
+        label.textContent = isDark ? 'Light' : 'Dark';
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const next = isDark ? 'light' : 'dark';
+      localStorage.setItem(THEME_KEY, next);
+      applyTheme(next);
+      lucide.createIcons();
+    }
+
+    function initTheme() {
+      const saved = localStorage.getItem(THEME_KEY);
+      if (saved === 'dark' || saved === 'light') {
+        applyTheme(saved);
+      } else {
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(prefersDark ? 'dark' : 'light');
+      }
+    }
+
+    function extractUniqueSubjects(classesList) {
+      const set = new Set();
+      classesList.forEach(c => {
+        if (c.subject && c.subject.trim()) set.add(c.subject.trim());
+      });
+      return [...set].sort((a, b) => a.localeCompare(b));
+    }
+
+    function ensureSubjectsList() {
+      if (!Array.isArray(appState.subjects)) {
+        appState.subjects = [];
+      }
+      const fromClasses = extractUniqueSubjects(appState.classes || []);
+      fromClasses.forEach(s => {
+        if (!appState.subjects.some(existing => existing.toLowerCase() === s.toLowerCase())) {
+          appState.subjects.push(s);
+        }
+      });
+      if (appState.subjects.length === 0) {
+        appState.subjects = ['General'];
+      }
+    }
 
     function hydrateSeedData() {
       const classes = SEED_PAYLOAD.c.map((r, idx) => ({
@@ -518,7 +652,8 @@ alter table tracker_store disable row level security;</pre>
         status: r[10] === 1 ? 'Completed' : 'Pending'
       }));
 
-      return { classes, exams };
+      const subjects = extractUniqueSubjects(classes);
+      return { classes, exams, subjects };
     }
 
     function showToast(msg) {
@@ -528,11 +663,17 @@ alter table tracker_store disable row level security;</pre>
       setTimeout(() => el.classList.add('translate-y-20', 'opacity-0'), 2800);
     }
 
-    // Cloud Sync Layer (Supabase REST API - Zero SDK dependencies needed)
+    // Cloud Sync Layer (Pre-configured with your Supabase project)
     function getCloudConfig() {
       try {
-        return JSON.parse(localStorage.getItem(CLOUD_CFG_KEY));
-      } catch { return null; }
+        const saved = JSON.parse(localStorage.getItem(CLOUD_CFG_KEY));
+        if (saved && saved.url && saved.key) return saved;
+      } catch { }
+      return {
+        url: 'https://qdboqwkfaewpvmvrwuxh.supabase.co',
+        key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkYm9xd2tmYWV3cHZtdnJ3dXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ4NDIzOTIsImV4cCI6MjExMDQxODM5Mn0.DWFP8rtiy-8GAMgISpSKniijTeJzjcz2tI69Irnue9U',
+        workspace: 'tnpsc_main_tracker'
+      };
     }
 
     function updateCloudBadge(status, label) {
@@ -592,6 +733,7 @@ alter table tracker_store disable row level security;</pre>
         const rows = await res.json();
         if (rows && rows.length > 0 && rows[0].payload) {
           appState = rows[0].payload;
+          ensureSubjectsList();
           localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
           updateCloudBadge('synced', 'Cloud Synced');
           return true;
@@ -607,10 +749,14 @@ alter table tracker_store disable row level security;</pre>
     }
 
     async function initApp() {
+      initTheme();
+      document.getElementById('copyrightYear').textContent = new Date().getFullYear();
+
       const localRaw = localStorage.getItem(STORAGE_KEY);
       if (localRaw) {
         try {
           appState = JSON.parse(localRaw);
+          ensureSubjectsList();
         } catch {
           appState = hydrateSeedData();
         }
@@ -631,11 +777,23 @@ alter table tracker_store disable row level security;</pre>
     }
 
     function refreshUI() {
+      ensureSubjectsList();
       updateStatsAndProgress();
       populateFilterDropdowns();
       renderClasses();
       renderExams();
+      if (!document.getElementById('subjectsModal').classList.contains('hidden')) {
+        renderSubjectsManagerList();
+      }
       lucide.createIcons();
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
     }
 
     function updateStatsAndProgress() {
@@ -652,29 +810,32 @@ alter table tracker_store disable row level security;</pre>
       document.getElementById('badgeClasses').textContent = total;
       document.getElementById('badgeExams').textContent = appState.exams.length;
 
-      // Group by Subject
+      // Group by Subject (including custom subjects with 0 classes)
       const subMap = {};
+      appState.subjects.forEach(s => {
+        subMap[s] = { total: 0, done: 0 };
+      });
       appState.classes.forEach(c => {
-        const s = (c.subject || 'Other').trim();
+        const s = (c.subject || 'General').trim();
         if (!subMap[s]) subMap[s] = { total: 0, done: 0 };
         subMap[s].total++;
         if (c.status === 'Completed') subMap[s].done++;
       });
 
-      const sortedSubjects = Object.entries(subMap).sort((a, b) => b[1].total - a[1].total);
+      const sortedSubjects = Object.entries(subMap).sort((a, b) => b[1].total - a[1].total || a[0].localeCompare(b[0]));
       const visibleSubjects = showAllSubjects ? sortedSubjects : sortedSubjects.slice(0, 4);
 
       const grid = document.getElementById('subjectProgressGrid');
       grid.innerHTML = visibleSubjects.map(([subj, counts]) => {
-        const p = Math.round((counts.done / counts.total) * 100);
+        const p = counts.total ? Math.round((counts.done / counts.total) * 100) : 0;
         return `
-          <div onclick="quickFilterSubject('${subj.replace(/'/g, "\\'")}')" class="cursor-pointer p-3 rounded-lg border border-slate-100 bg-slate-50/70 hover:bg-indigo-50/50 hover:border-indigo-200 transition">
-            <div class="flex justify-between items-center text-xs font-semibold text-slate-700 mb-1.5">
-              <span class="truncate pr-2">${subj}</span>
-              <span class="text-slate-500 shrink-0">${counts.done}/${counts.total} (${p}%)</span>
+          <div onclick="quickFilterSubject('${subj.replace(/'/g, "\\'")}')" class="cursor-pointer p-3 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/40 hover:border-indigo-200 dark:hover:border-indigo-800 transition">
+            <div class="flex justify-between items-center text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+              <span class="truncate pr-2">${escapeHtml(subj)}</span>
+              <span class="text-slate-500 dark:text-slate-400 shrink-0">${counts.done}/${counts.total} (${p}%)</span>
             </div>
-            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-              <div class="bg-indigo-600 h-full rounded-full transition-all duration-300" style="width: ${p}%"></div>
+            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+              <div class="bg-indigo-600 dark:bg-indigo-500 h-full rounded-full transition-all duration-300" style="width: ${p}%"></div>
             </div>
           </div>
         `;
@@ -696,20 +857,193 @@ alter table tracker_store disable row level security;</pre>
     function populateFilterDropdowns() {
       const subSelect = document.getElementById('filterSubject');
       const facSelect = document.getElementById('filterFaculty');
+      const formSubSelect = document.getElementById('cSubject');
+
       const curSub = subSelect.value;
       const curFac = facSelect.value;
+      const curFormSub = formSubSelect.value;
 
-      const subjects = [...new Set(appState.classes.map(c => c.subject).filter(Boolean))].sort();
+      const subjects = [...appState.subjects].sort((a, b) => a.localeCompare(b));
       const faculties = [...new Set(appState.classes.map(c => c.faculty).filter(Boolean))].sort();
 
-      subSelect.innerHTML = '<option value="">All Subjects</option>' + subjects.map(s => `<option value="${s}">${s}</option>`).join('');
-      facSelect.innerHTML = '<option value="">All Faculties</option>' + faculties.map(f => `<option value="${f}">${f}</option>`).join('');
+      subSelect.innerHTML = '<option value="">All Subjects</option>' + subjects.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+      facSelect.innerHTML = '<option value="">All Faculties</option>' + faculties.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('');
 
-      document.getElementById('subjectSuggestions').innerHTML = subjects.map(s => `<option value="${s}">`).join('');
-      document.getElementById('facultySuggestions').innerHTML = faculties.map(f => `<option value="${f}">`).join('');
+      formSubSelect.innerHTML = subjects.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+      document.getElementById('facultySuggestions').innerHTML = faculties.map(f => `<option value="${escapeHtml(f)}">`).join('');
 
       subSelect.value = curSub;
       facSelect.value = curFac;
+      if (curFormSub && subjects.includes(curFormSub)) {
+        formSubSelect.value = curFormSub;
+      }
+    }
+
+    // SUBJECTS LIST CRUD MANAGER
+    function openSubjectsModal() {
+      editingSubjectIndex = -1;
+      document.getElementById('subjectsModal').classList.remove('hidden');
+      renderSubjectsManagerList();
+      lucide.createIcons();
+    }
+
+    function closeSubjectsModal() {
+      editingSubjectIndex = -1;
+      document.getElementById('subjectsModal').classList.add('hidden');
+    }
+
+    function renderSubjectsManagerList() {
+      const container = document.getElementById('subjectsManagerList');
+      const countsMap = {};
+      appState.classes.forEach(c => {
+        const s = (c.subject || '').trim();
+        countsMap[s] = (countsMap[s] || 0) + 1;
+      });
+
+      if (appState.subjects.length === 0) {
+        container.innerHTML = '<p class="text-center text-xs text-slate-400 py-6">No subjects yet. Add one above!</p>';
+        return;
+      }
+
+      container.innerHTML = appState.subjects.map((subj, idx) => {
+        const count = countsMap[subj] || 0;
+        const isEditing = editingSubjectIndex === idx;
+
+        if (isEditing) {
+          return `
+            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800">
+              <input type="text" id="editSubjectInput_${idx}" value="${escapeHtml(subj)}" onkeydown="if(event.key==='Enter'){event.preventDefault();saveEditedSubject(${idx});} else if(event.key==='Escape'){cancelEditSubject();}" class="flex-1 px-2.5 py-1.5 text-sm border border-indigo-300 dark:border-indigo-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" autofocus />
+              <button type="button" onclick="saveEditedSubject(${idx})" class="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">Save</button>
+              <button type="button" onclick="cancelEditSubject()" class="px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg">Cancel</button>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="font-medium text-sm text-slate-800 dark:text-slate-100 truncate">${escapeHtml(subj)}</span>
+              <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">${count} ${count === 1 ? 'class' : 'classes'}</span>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button type="button" onclick="startEditSubject(${idx})" title="Rename Subject" class="p-1.5 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 rounded-lg transition">
+                <i data-lucide="pencil" class="w-4 h-4"></i>
+              </button>
+              <button type="button" onclick="deleteSubjectItem(${idx})" title="Delete Subject" class="p-1.5 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/60 rounded-lg transition">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function addNewSubjectItem(e) {
+      e.preventDefault();
+      const input = document.getElementById('newSubjectInput');
+      const val = input.value.trim();
+      if (!val) return;
+
+      if (appState.subjects.some(s => s.toLowerCase() === val.toLowerCase())) {
+        showToast('Subject already exists in list');
+        input.value = '';
+        return;
+      }
+
+      appState.subjects.push(val);
+      appState.subjects.sort((a, b) => a.localeCompare(b));
+      input.value = '';
+      refreshUI();
+      pushToCloud();
+      showToast(`Added "${val}" to subjects`);
+    }
+
+    function quickAddSubjectFromForm() {
+      const name = prompt('Enter new subject name:');
+      if (!name || !name.trim()) return;
+      const clean = name.trim();
+      if (!appState.subjects.some(s => s.toLowerCase() === clean.toLowerCase())) {
+        appState.subjects.push(clean);
+        appState.subjects.sort((a, b) => a.localeCompare(b));
+        populateFilterDropdowns();
+        pushToCloud();
+      }
+      const exactMatch = appState.subjects.find(s => s.toLowerCase() === clean.toLowerCase()) || clean;
+      document.getElementById('cSubject').value = exactMatch;
+      showToast(`Selected "${exactMatch}"`);
+    }
+
+    function startEditSubject(idx) {
+      editingSubjectIndex = idx;
+      renderSubjectsManagerList();
+      const el = document.getElementById(`editSubjectInput_${idx}`);
+      if (el) { el.focus(); el.select(); }
+    }
+
+    function cancelEditSubject() {
+      editingSubjectIndex = -1;
+      renderSubjectsManagerList();
+    }
+
+    function saveEditedSubject(idx) {
+      const el = document.getElementById(`editSubjectInput_${idx}`);
+      if (!el) return;
+      const oldName = appState.subjects[idx];
+      const newName = el.value.trim();
+
+      if (!newName) {
+        alert('Subject name cannot be empty.');
+        return;
+      }
+      if (newName === oldName) {
+        editingSubjectIndex = -1;
+        renderSubjectsManagerList();
+        return;
+      }
+      if (appState.subjects.some((s, i) => i !== idx && s.toLowerCase() === newName.toLowerCase())) {
+        alert(`"${newName}" already exists in the subjects list.`);
+        return;
+      }
+
+      appState.subjects[idx] = newName;
+      appState.subjects.sort((a, b) => a.localeCompare(b));
+      let updatedCount = 0;
+      appState.classes.forEach(c => {
+        if ((c.subject || '').trim() === oldName) {
+          c.subject = newName;
+          updatedCount++;
+        }
+      });
+
+      editingSubjectIndex = -1;
+      refreshUI();
+      pushToCloud();
+      showToast(`Renamed to "${newName}" (${updatedCount} classes updated)`);
+    }
+
+    function deleteSubjectItem(idx) {
+      const subj = appState.subjects[idx];
+      const linkedClasses = appState.classes.filter(c => (c.subject || '').trim() === subj).length;
+
+      if (linkedClasses > 0) {
+        const proceed = confirm(`"${subj}" is assigned to ${linkedClasses} class(es).\n\nClick OK to remove "${subj}" and move those classes to "General".`);
+        if (!proceed) return;
+        appState.classes.forEach(c => {
+          if ((c.subject || '').trim() === subj) c.subject = 'General';
+        });
+        if (!appState.subjects.includes('General')) {
+          appState.subjects.push('General');
+        }
+      } else {
+        if (!confirm(`Remove "${subj}" from your subjects list?`)) return;
+      }
+
+      appState.subjects = appState.subjects.filter(s => s !== subj);
+      if (appState.subjects.length === 0) appState.subjects = ['General'];
+      refreshUI();
+      pushToCloud();
+      showToast(`Removed "${subj}"`);
     }
 
     function renderClasses() {
@@ -742,36 +1076,36 @@ alter table tracker_store disable row level security;</pre>
       tbody.innerHTML = filtered.map(c => {
         const isDone = c.status === 'Completed';
         return `
-          <tr class="hover:bg-slate-50/90 transition group">
-            <td class="py-3 px-4 whitespace-nowrap text-xs font-medium text-slate-600">${c.date || '-'}</td>
+          <tr class="hover:bg-slate-50/90 dark:hover:bg-slate-800/50 transition group">
+            <td class="py-3 px-4 whitespace-nowrap text-xs font-medium text-slate-600 dark:text-slate-400">${escapeHtml(c.date) || '-'}</td>
             <td class="py-3 px-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
-                ${c.subject || 'General'}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/60">
+                ${escapeHtml(c.subject) || 'General'}
               </span>
             </td>
-            <td class="py-3 px-4 font-medium text-slate-800 max-w-xs">
-              ${c.topic ? c.topic : '<span class="text-slate-400 italic font-normal">Topic not specified</span>'}
+            <td class="py-3 px-4 font-medium text-slate-800 dark:text-slate-100 max-w-xs">
+              ${c.topic ? escapeHtml(c.topic) : '<span class="text-slate-400 dark:text-slate-500 italic font-normal">Topic not specified</span>'}
             </td>
-            <td class="py-3 px-4 whitespace-nowrap text-xs text-slate-600">${c.faculty || '-'}</td>
+            <td class="py-3 px-4 whitespace-nowrap text-xs text-slate-600 dark:text-slate-400">${escapeHtml(c.faculty) || '-'}</td>
             <td class="py-3 px-4 whitespace-nowrap">
               <div class="flex items-center gap-2">
-                ${c.classUrl ? `<a href="${c.classUrl}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2 py-1 rounded bg-sky-50 text-sky-700 hover:bg-sky-100 text-xs font-medium transition"><i data-lucide="play-circle" class="w-3.5 h-3.5"></i> Video</a>` : ''}
-                ${c.sourceUrl ? `<a href="${c.sourceUrl}" target="_blank" rel="noopener" title="${c.sourceName || 'Study Material'}" class="inline-flex items-center gap-1 px-2 py-1 rounded bg-violet-50 text-violet-700 hover:bg-violet-100 text-xs font-medium transition"><i data-lucide="file-text" class="w-3.5 h-3.5"></i> Notes</a>` : (c.sourceName ? `<span class="text-xs text-slate-500">${c.sourceName}</span>` : '')}
-                ${!c.classUrl && !c.sourceUrl && !c.sourceName ? '<span class="text-xs text-slate-300">—</span>' : ''}
+                ${c.classUrl ? `<a href="${escapeHtml(c.classUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2 py-1 rounded bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/70 text-xs font-medium transition"><i data-lucide="play-circle" class="w-3.5 h-3.5"></i> Video</a>` : ''}
+                ${c.sourceUrl ? `<a href="${escapeHtml(c.sourceUrl)}" target="_blank" rel="noopener" title="${escapeHtml(c.sourceName) || 'Study Material'}" class="inline-flex items-center gap-1 px-2 py-1 rounded bg-violet-50 dark:bg-violet-950/70 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/70 text-xs font-medium transition"><i data-lucide="file-text" class="w-3.5 h-3.5"></i> Notes</a>` : (c.sourceName ? `<span class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(c.sourceName)}</span>` : '')}
+                ${!c.classUrl && !c.sourceUrl && !c.sourceName ? '<span class="text-xs text-slate-300 dark:text-slate-600">—</span>' : ''}
               </div>
             </td>
             <td class="py-3 px-4 whitespace-nowrap">
-              <button onclick="toggleClassStatus('${c.id}')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition ${isDone ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-amber-100 text-amber-800 hover:bg-amber-200'}">
-                <span class="w-1.5 h-1.5 rounded-full ${isDone ? 'bg-emerald-600' : 'bg-amber-600'}"></span>
+              <button onclick="toggleClassStatus('${c.id}')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition ${isDone ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/80' : 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/80'}">
+                <span class="w-1.5 h-1.5 rounded-full ${isDone ? 'bg-emerald-600 dark:bg-emerald-400' : 'bg-amber-600 dark:bg-amber-400'}"></span>
                 ${c.status}
               </button>
             </td>
             <td class="py-3 px-4 whitespace-nowrap text-right">
               <div class="inline-flex items-center gap-1">
-                <button onclick="editClass('${c.id}')" title="Edit" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">
+                <button onclick="editClass('${c.id}')" title="Edit" class="p-1.5 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 rounded-lg transition">
                   <i data-lucide="pencil" class="w-4 h-4"></i>
                 </button>
-                <button onclick="deleteClass('${c.id}')" title="Delete" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
+                <button onclick="deleteClass('${c.id}')" title="Delete" class="p-1.5 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/60 rounded-lg transition">
                   <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
               </div>
@@ -787,28 +1121,28 @@ alter table tracker_store disable row level security;</pre>
       tbody.innerHTML = appState.exams.map(e => {
         const isDone = e.status === 'Completed';
         return `
-          <tr class="hover:bg-slate-50 transition">
-            <td class="py-3.5 px-4 whitespace-nowrap text-xs font-semibold text-slate-700">${e.date || '-'}</td>
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+            <td class="py-3.5 px-4 whitespace-nowrap text-xs font-semibold text-slate-700 dark:text-slate-300">${escapeHtml(e.date) || '-'}</td>
             <td class="py-3.5 px-4">
-              ${e.qpUrl ? `<a href="${e.qpUrl}" target="_blank" class="text-indigo-600 hover:underline font-medium text-xs flex items-center gap-1"><i data-lucide="file-question" class="w-3.5 h-3.5"></i> ${e.qpName || 'Question Paper'}</a>` : (e.qpName || '<span class="text-slate-400 text-xs">Not uploaded</span>')}
+              ${e.qpUrl ? `<a href="${escapeHtml(e.qpUrl)}" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium text-xs flex items-center gap-1"><i data-lucide="file-question" class="w-3.5 h-3.5"></i> ${escapeHtml(e.qpName) || 'Question Paper'}</a>` : (escapeHtml(e.qpName) || '<span class="text-slate-400 dark:text-slate-500 text-xs">Not uploaded</span>')}
             </td>
             <td class="py-3.5 px-4 space-x-2 whitespace-nowrap">
-              ${e.omrUrl ? `<a href="${e.omrUrl}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs">OMR</a>` : ''}
-              ${e.akUrl ? `<a href="${e.akUrl}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs">Answer Key</a>` : ''}
-              ${!e.omrUrl && !e.akUrl ? '<span class="text-xs text-slate-400">—</span>' : ''}
+              ${e.omrUrl ? `<a href="${escapeHtml(e.omrUrl)}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs">OMR</a>` : ''}
+              ${e.akUrl ? `<a href="${escapeHtml(e.akUrl)}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/70 text-xs">Answer Key</a>` : ''}
+              ${!e.omrUrl && !e.akUrl ? '<span class="text-xs text-slate-400 dark:text-slate-600">—</span>' : ''}
             </td>
-            <td class="py-3.5 px-4 whitespace-nowrap text-xs font-semibold text-slate-800">
-              ${e.marks || '-'} ${e.percentage ? `<span class="text-indigo-600">(${e.percentage})</span>` : ''}
+            <td class="py-3.5 px-4 whitespace-nowrap text-xs font-semibold text-slate-800 dark:text-slate-200">
+              ${escapeHtml(e.marks) || '-'} ${e.percentage ? `<span class="text-indigo-600 dark:text-indigo-400">(${escapeHtml(e.percentage)})</span>` : ''}
             </td>
-            <td class="py-3.5 px-4 text-xs text-slate-600 max-w-xs">${e.notes || '-'}</td>
+            <td class="py-3.5 px-4 text-xs text-slate-600 dark:text-slate-400 max-w-xs">${escapeHtml(e.notes) || '-'}</td>
             <td class="py-3.5 px-4 whitespace-nowrap">
-              <button onclick="toggleExamStatus('${e.id}')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+              <button onclick="toggleExamStatus('${e.id}')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${isDone ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300' : 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300'}">
                 ${e.status}
               </button>
             </td>
             <td class="py-3.5 px-4 whitespace-nowrap text-right">
-              <button onclick="editExam('${e.id}')" class="p-1.5 text-slate-500 hover:text-indigo-600 rounded-lg"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-              <button onclick="deleteExam('${e.id}')" class="p-1.5 text-slate-500 hover:text-rose-600 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+              <button onclick="editExam('${e.id}')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+              <button onclick="deleteExam('${e.id}')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </td>
           </tr>
         `;
@@ -831,18 +1165,19 @@ alter table tracker_store disable row level security;</pre>
       document.getElementById('viewExams').classList.toggle('hidden', isClasses);
 
       document.getElementById('tabClasses').className = isClasses
-        ? 'px-4 py-2 rounded-lg text-sm font-semibold bg-white text-slate-900 shadow-sm transition flex items-center gap-2'
-        : 'px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2';
+        ? 'px-4 py-2 rounded-lg text-sm font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm transition flex items-center gap-2'
+        : 'px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2';
 
       document.getElementById('tabExams').className = !isClasses
-        ? 'px-4 py-2 rounded-lg text-sm font-semibold bg-white text-slate-900 shadow-sm transition flex items-center gap-2'
-        : 'px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2';
+        ? 'px-4 py-2 rounded-lg text-sm font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm transition flex items-center gap-2'
+        : 'px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2';
 
       document.getElementById('addBtnLabel').textContent = isClasses ? 'Add New Class' : 'Add Mock Exam';
     }
 
     // CRUD Operations - Classes
     function openRecordModal() {
+      populateFilterDropdowns();
       document.getElementById('recordModal').classList.remove('hidden');
       if (currentTab === 'classes') {
         document.getElementById('classForm').classList.remove('hidden');
@@ -873,6 +1208,10 @@ alter table tracker_store disable row level security;</pre>
       document.getElementById('modalTitle').textContent = 'Edit Class Record';
       document.getElementById('classEditId').value = rec.id;
       document.getElementById('cDate').value = rec.date;
+      if (rec.subject && !appState.subjects.includes(rec.subject)) {
+        appState.subjects.push(rec.subject);
+        populateFilterDropdowns();
+      }
       document.getElementById('cSubject').value = rec.subject;
       document.getElementById('cTopic').value = rec.topic;
       document.getElementById('cFaculty').value = rec.faculty;
@@ -885,10 +1224,11 @@ alter table tracker_store disable row level security;</pre>
     function saveClassRecord(e) {
       e.preventDefault();
       const editId = document.getElementById('classEditId').value;
+      const subj = document.getElementById('cSubject').value.trim();
       const entry = {
         id: editId || 'c_' + Date.now().toString(36),
         date: document.getElementById('cDate').value,
-        subject: document.getElementById('cSubject').value.trim(),
+        subject: subj,
         topic: document.getElementById('cTopic').value.trim(),
         faculty: document.getElementById('cFaculty').value.trim(),
         classUrl: document.getElementById('cClassUrl').value.trim(),
@@ -896,6 +1236,10 @@ alter table tracker_store disable row level security;</pre>
         sourceUrl: document.getElementById('cSourceUrl').value.trim(),
         status: document.getElementById('cStatus').value
       };
+
+      if (subj && !appState.subjects.includes(subj)) {
+        appState.subjects.push(subj);
+      }
 
       if (editId) {
         const idx = appState.classes.findIndex(c => c.id === editId);
@@ -1027,7 +1371,7 @@ alter table tracker_store disable row level security;</pre>
     }
 
     function resetToExcelSeed() {
-      if (!confirm('Restore all 222 classes and 3 exams from your original Excel file?')) return;
+      if (!confirm('Restore all 222 classes, subjects, and 3 exams from your original Excel file?')) return;
       appState = hydrateSeedData();
       refreshUI();
       pushToCloud();
@@ -1052,6 +1396,7 @@ alter table tracker_store disable row level security;</pre>
           const parsed = JSON.parse(e.target.result);
           if (parsed.classes && parsed.exams) {
             appState = parsed;
+            ensureSubjectsList();
             refreshUI();
             pushToCloud();
             showToast('Backup restored successfully');
